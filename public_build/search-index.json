@@ -24,49 +24,9 @@
     "url": "/actualidad/sesion-informativa-comunitaria"
   },
   {
-    "type": "Actualidad",
-    "title": "Marcala, ciudad de amistad y aroma de café",
-    "summary": "Marcala destaca por su identidad cafetalera, su tradición comunitaria y su papel como referente en la región de La Paz.",
-    "body": "Marcala es ampliamente reconocida por su café de altura y por la Denominación de Origen Café Marcala. Este contenido de prueba resume información pública sobre el municipio y debe ser validado por la Municipalidad antes de usarse como publicación oficial.\n\nLa identidad local combina actividad cafetalera, vida comunitaria, historia municipal y pertenencia al entorno cultural lenca.",
-    "tags": "cafe, identidad, marcala",
-    "url": "/actualidad/marcala-ciudad-de-amistad-y-aroma-de-cafe"
-  },
-  {
-    "type": "Actualidad",
-    "title": "Datos generales del municipio de Marcala",
-    "summary": "Resumen de datos históricos, ubicación y actividad económica para pruebas de contenido institucional.",
-    "body": "Marcala pertenece al departamento de La Paz. Fuentes públicas describen el municipio como una zona de montaña con actividad agrícola, cafetalera y comercial. Entre los datos históricos usados para esta prueba se incluye la creación municipal en 1834 y la relación histórica del territorio con comunidades lencas.\n\nEste texto no sustituye una ficha oficial; sirve para probar estructura, búsqueda y lectura pública del sitio.",
-    "tags": "historia, municipio, datos",
-    "url": "/actualidad/datos-generales-del-municipio-de-marcala"
-  },
-  {
-    "type": "Actualidad",
-    "title": "Transparencia municipal y acceso a la información pública",
-    "summary": "El portal institucional debe facilitar el acceso a documentos, informes, presupuesto y rendición de cuentas.",
-    "body": "La sección de transparencia se prepara para organizar documentos públicos por categoría, año, dependencia y fecha del documento. El objetivo es facilitar a la ciudadanía el acceso a información municipal, incluyendo presupuesto, actas, informes, licitaciones y compras.\n\nEsta entrada es una prueba basada en la lógica del Portal Único de Transparencia.",
-    "tags": "transparencia, documentos, acceso",
-    "url": "/actualidad/transparencia-municipal-y-acceso-a-la-informacion-publica"
-  },
-  {
-    "type": "Actualidad",
-    "title": "Obras y proyectos como categoría de actualidad",
-    "summary": "La categoría permite publicar avances, inspecciones, informes y proyectos municipales sin crear un menú separado.",
-    "body": "Esta publicación de prueba muestra cómo se vería una nota de obras y proyectos. Puede incluir descripción, sector beneficiado, dependencia responsable, fecha, estado del avance, fotografías y enlaces a documentos de respaldo.\n\nLa información final debe ser cargada por el equipo municipal con datos oficiales.",
-    "tags": "obras, proyectos, avances",
-    "url": "/actualidad/obras-y-proyectos-como-categoria-de-actualidad"
-  },
-  {
-    "type": "Actualidad",
-    "title": "Feria patronal de San Miguel",
-    "summary": "Marcala celebra tradicionalmente su feria patronal en honor a San Miguel el 29 de septiembre.",
-    "body": "Entrada de agenda para probar actividades municipales y culturales. La fecha, programación y responsables deben ser confirmados por la Municipalidad antes de publicarse oficialmente.",
-    "tags": "cultura, feria, comunidad",
-    "url": "/actualidad/feria-patronal-de-san-miguel"
-  },
-  {
     "type": "Trámite",
     "title": "Solicitud de constancia municipal",
-    "summary": "Orientación para solicitar constancias emitidas por la Municipalidad.",
+    "summary": "Información para solicitar constancias emitidas por la Municipalidad.",
     "body": "Documento de identidad vigente\nDatos exactos que deben constar en la certificación\nComprobante de pago si aplica",
     "tags": "tramites, constancias",
     "url": "/tramites/solicitud-de-constancia-municipal"
@@ -80,67 +40,27 @@
     "url": "/tramites/pago-de-tasas-municipales"
   },
   {
-    "type": "Trámite",
-    "title": "Consulta y pago de tasas municipales",
-    "summary": "Pasos generales para consultar y pagar tasas o servicios municipales.",
-    "body": "Identificación del contribuyente\nClave catastral o referencia del servicio cuando aplique",
-    "tags": "pagos, tesoreria",
-    "url": "/tramites/consulta-y-pago-de-tasas-municipales"
-  },
-  {
-    "type": "Trámite",
-    "title": "Acceso a información pública",
-    "summary": "Guía para solicitar información pública municipal.",
-    "body": "Identificación del solicitante\nDescripción clara de la información requerida\nMedio de contacto para respuesta",
-    "tags": "transparencia, informacion",
-    "url": "/tramites/acceso-a-informacion-publica"
-  },
-  {
-    "type": "Trámite",
-    "title": "Atención en Unidad Técnica Municipal",
-    "summary": "Orientación general para consultas relacionadas con obras, inspecciones o proyectos municipales.",
-    "body": "Datos del solicitante\nUbicación o referencia del caso\nDocumentación de respaldo si existe",
-    "tags": "obras, proyectos",
-    "url": "/tramites/atencion-en-unidad-tecnica-municipal"
-  },
-  {
     "type": "Transparencia",
     "title": "Ejemplo de documento de transparencia",
     "summary": "Ficha de muestra para reemplazar por un PDF oficial cuando el municipio cargue sus documentos.",
     "body": "Secretaría Municipal",
     "tags": "transparencia, informe",
-    "url": "/transparencia"
-  },
-  {
-    "type": "Transparencia",
-    "title": "Portal Único de Transparencia de Marcala",
-    "summary": "Enlace público al portal de transparencia de la Alcaldía Municipal de Marcala.",
-    "body": "Alcaldía Municipal",
-    "tags": "transparencia, iaip",
-    "url": "/transparencia"
-  },
-  {
-    "type": "Transparencia",
-    "title": "Perfil Municipal de Marcala",
-    "summary": "Perfil municipal disponible en biblioteca virtual gubernamental para consulta pública.",
-    "body": "SGJD",
-    "tags": "perfil, municipio",
-    "url": "/transparencia"
-  },
-  {
-    "type": "Transparencia",
-    "title": "Ficha de población y vivienda de Marcala",
-    "summary": "Ficha estadística pública del municipio, útil como referencia demográfica.",
-    "body": "INE",
-    "tags": "poblacion, ine",
-    "url": "/transparencia"
+    "url": "/transparencia/ejemplo-documento-transparencia"
   },
   {
     "type": "Municipalidad",
-    "title": "Ana Lucía Castro López",
-    "summary": "Alcaldesa Municipal de Marcala. El Portal Único de Transparencia identifica a Ana Lucía Castro López como autoridad municipal y documentos públicos de la municipalidad la registran dentro de la corporación municipal 2022-2026.\n\nEsta biografía es un texto de prueba, pendiente de fotografía oficial y validación por el equipo municipal.",
-    "body": "2022",
-    "tags": "alcaldia, municipalidad",
-    "url": "/municipalidad"
+    "title": "Carmen Georgina Bautista Claros",
+    "summary": "Carmen Georgina Bautista Claros es una líder política hondureña y actual alcaldesa del municipio de Marcala, en el departamento de La Paz, para el período constitucional 2026-2030. Su ascenso a la titularidad de la corporación municipal marca un hito en la representación femenina de la región y consolida su liderazgo dentro del Partido Nacional de Honduras.\r\n\r\nTrayectoria Política y Elección\r\nAfiliada al Partido Nacional, Bautista Claros construyó su camino hacia la alcaldía mediante un fuerte trabajo comunitario y una campaña enfocada en las necesidades estructurales de Marcala. Tras resultar electa en los comicios generales, asumió oficialmente su cargo en enero de 2026, sucediendo a las administraciones anteriores con la promesa de una gestión transparente y orientada al desarrollo local.\r\n\r\nEjes de Gestión y Visión\r\nDesde el inicio de su mandato en 2026, su plan de gobierno se ha centrado en dinamizar la economía de Marcala, una región clave por su alta producción de café de calidad internacional. Entre sus prioridades principales destacan:\r\n\r\n-Infraestructura Vial: El mejoramiento y pavimentación de las carreteras y accesos rurales para facilitar el comercio.\r\n-Apoyo Social: La implementación de programas de asistencia para sectores vulnerables del municipio.\r\n-Fortalecimiento Institucional: La modernización de los servicios municipales para los ciudadanos.\r\n\r\nComo una de las pocas mujeres al frente de una alcaldía en el departamento de La Paz en el ciclo actual, Carmen Bautista es una figura clave en la política local, enfocada en transformar a Marcala en un municipio más próspero y conectado.",
+    "body": "2026",
+    "tags": "municipalidad, gestion",
+    "url": "/municipalidad/alcaldes/autoridad-municipal-actual"
+  },
+  {
+    "type": "Municipalidad",
+    "title": "yo no sé",
+    "summary": "asdasd  asdasdasd",
+    "body": "2000",
+    "tags": "",
+    "url": "/municipalidad/alcaldes/www-google-com"
   }
 ]
