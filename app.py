@@ -375,7 +375,7 @@ def create_app() -> Flask:
         if request.method == "POST":
             record_id = save_content(kind)
             flash("Contenido creado.", "success")
-            return redirect(url_for("admin_content_edit", kind=kind, record_id=record_id))
+            return redirect_after_content_save(kind, record_id)
         return render_template("admin_content_form.html", item=None, kind=kind)
 
     @app.route("/admin/<kind>/<int:record_id>", methods=["GET", "POST"])
@@ -389,8 +389,19 @@ def create_app() -> Flask:
         if request.method == "POST":
             save_content(kind, item)
             flash("Contenido actualizado.", "success")
-            return redirect(url_for("admin_content_edit", kind=kind, record_id=record_id))
+            return redirect_after_content_save(kind, record_id)
         return render_template("admin_content_form.html", item=item, kind=kind)
+
+    @app.get("/admin/<kind>/<int:record_id>/guardado")
+    @login_required
+    def admin_content_saved(kind: str, record_id: int):
+        if kind not in {"actualidad", "agenda"}:
+            abort(404)
+        item = query_one("SELECT * FROM content WHERE id = ? AND kind = ?", [record_id, kind])
+        if not item:
+            abort(404)
+        public_url = url_for("actualidad_detail", slug=item["slug"]) if item["status"] == "published" else ""
+        return render_template("admin_content_saved.html", item=item, kind=kind, public_url=public_url)
 
     @app.get("/admin/tramites")
     @login_required
@@ -1029,6 +1040,10 @@ def login_required(view: Callable[..., Any]) -> Callable[..., Any]:
     @wraps(view)
     def wrapped(*args: Any, **kwargs: Any) -> Any:
         if not current_user():
+            if request.method == "POST":
+                flash("Tu sesión venció antes de guardar. Inicia sesión y vuelve a guardar los cambios.", "error")
+            else:
+                flash("Inicia sesión para continuar.", "error")
             return redirect(url_for("admin_login"))
         return view(*args, **kwargs)
 
@@ -1046,6 +1061,16 @@ def admin_required(view: Callable[..., Any]) -> Callable[..., Any]:
         return view(*args, **kwargs)
 
     return wrapped
+
+
+def redirect_after_content_save(kind: str, record_id: int) -> Any:
+    action = request.form.get("action", "save")
+    if action == "save_preview":
+        item = query_one("SELECT slug, status FROM content WHERE id = ? AND kind = ?", [record_id, kind])
+        if item and item["status"] == "published":
+            return redirect(url_for("actualidad_detail", slug=item["slug"]))
+        return redirect(url_for("admin_content_saved", kind=kind, record_id=record_id))
+    return redirect(url_for("admin_content_edit", kind=kind, record_id=record_id))
 
 
 def get_setting(key: str, default: str = "") -> str:

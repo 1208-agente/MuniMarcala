@@ -1,0 +1,31 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<section class="admin-feed-hero compact">
+  <div>
+    <p class="eyebrow">Guardado</p>
+    <h1>{{ item.title }}</h1>
+    <p>La ficha fue guardada correctamente. Revisa cómo quedó o vuelve al formulario para seguir ajustando el contenido.</p>
+  </div>
+</section>
+
+<section class="admin-feed-card saved-card">
+  <div class="admin-feed-card-head">
+    <div>
+      <span>{{ item.status|status_label }}</span>
+      <h2>Opciones rápidas</h2>
+      {% if not public_url %}
+      <p>Esta ficha no se muestra al público porque está como {{ item.status|status_label }}.</p>
+      {% else %}
+      <p>Abre la publicación pública para revisar el resultado final.</p>
+      {% endif %}
+    </div>
+  </div>
+  <div class="admin-form-actions saved-actions">
+    {% if public_url %}
+    <a class="button" href="{{ public_url }}" target="_blank" rel="noopener">Ver publicación pública</a>
+    {% endif %}
+    <a class="admin-button secondary" href="/admin/{{ kind }}/{{ item.id }}">Volver a editar</a>
+    <a class="admin-button secondary" href="/admin">Volver al panel</a>
+  </div>
+</section>
+{% endblock %}

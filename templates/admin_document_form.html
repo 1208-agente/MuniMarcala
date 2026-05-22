@@ -4,7 +4,12 @@
 <form class="admin-form" method="post" enctype="multipart/form-data">
   <div class="form-grid">
     <label>Título<input name="title" required value="{{ item.title if item else '' }}"></label>
-    <label>Slug<input name="slug" value="{{ item.slug if item else '' }}"></label>
+    <details class="advanced-field">
+      <summary>Enlace de la página</summary>
+      <label>Texto del enlace interno
+        <input name="slug" value="{{ item.slug if item else '' }}" placeholder="Se genera automáticamente">
+      </label>
+    </details>
     <label>Categoría<select name="category">{% for value, label in document_categories %}<option value="{{ value }}" {{ 'selected' if item and item.category == value else '' }}>{{ label }}</option>{% endfor %}</select></label>
     <label>Fecha del documento<input type="date" name="document_date" value="{{ item.document_date if item else '' }}"></label>
     <label>Año<input name="year" inputmode="numeric" value="{{ item.year if item else '' }}"></label>

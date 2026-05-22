@@ -634,6 +634,29 @@ button {
   padding: clamp(2.5rem, 6vw, 5rem) 1rem;
 }
 
+.public-admin-bar {
+  align-items: center;
+  background: #0f2f24;
+  color: #fff;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  justify-content: center;
+  padding: .8rem 1rem;
+}
+
+.public-admin-bar span {
+  font-weight: 900;
+}
+
+.public-admin-bar a {
+  border: 1px solid rgba(255, 255, 255, .35);
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 900;
+  padding: .45rem .8rem;
+}
+
 .article header {
   margin-bottom: 1.5rem;
 }
@@ -1025,6 +1048,44 @@ button {
 
 .admin-feed-shell .admin-table-wrap {
   box-shadow: 0 10px 26px rgba(31, 41, 55, .07);
+}
+
+.advanced-field {
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: .75rem;
+}
+
+.advanced-field summary {
+  color: var(--green);
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.advanced-field label {
+  margin: .75rem 0 0;
+}
+
+.admin-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .65rem;
+  margin-top: 1rem;
+}
+
+.session-note {
+  color: var(--muted);
+  font-size: .92rem;
+  margin: .85rem 0 0;
+}
+
+.saved-card {
+  max-width: 760px;
+}
+
+.saved-actions {
+  padding: 1rem;
 }
 
 @media (max-width: 1050px) {

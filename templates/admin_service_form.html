@@ -4,7 +4,12 @@
 <form class="admin-form" method="post">
   <div class="form-grid">
     <label>Nombre<input name="title" required value="{{ item.title if item else '' }}"></label>
-    <label>Slug<input name="slug" value="{{ item.slug if item else '' }}"></label>
+    <details class="advanced-field">
+      <summary>Enlace de la página</summary>
+      <label>Texto del enlace interno
+        <input name="slug" value="{{ item.slug if item else '' }}" placeholder="Se genera automáticamente">
+      </label>
+    </details>
     <label>Dependencia<input name="department" value="{{ item.department if item else '' }}"></label>
     <label>Estado<select name="status">{% for value, label in statuses %}<option value="{{ value }}" {{ 'selected' if item and item.status == value else '' }}>{{ label }}</option>{% endfor %}</select></label>
     <label>Costo<input name="cost" value="{{ item.cost if item else '' }}"></label>

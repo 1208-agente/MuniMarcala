@@ -4,7 +4,12 @@
 <form class="admin-form" method="post" enctype="multipart/form-data">
   <div class="form-grid">
     <label>Nombre<input name="name" required value="{{ item.name if item else '' }}"></label>
-    <label>Slug<input name="slug" value="{{ item.slug if item else '' }}"></label>
+    <details class="advanced-field">
+      <summary>Enlace de la página</summary>
+      <label>Texto del enlace interno
+        <input name="slug" value="{{ item.slug if item else '' }}" placeholder="Se genera automáticamente">
+      </label>
+    </details>
     <label>Inicio de periodo<input name="period_start" value="{{ item.period_start if item else '' }}"></label>
     <label>Fin de periodo<input name="period_end" value="{{ item.period_end if item else '' }}"></label>
     <label>Estado<select name="status">{% for value, label in statuses %}<option value="{{ value }}" {{ 'selected' if item and item.status == value else '' }}>{{ label }}</option>{% endfor %}</select></label>

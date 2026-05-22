@@ -11,7 +11,13 @@
 <form class="admin-form" method="post" enctype="multipart/form-data">
   <div class="form-grid">
     <label>Título<input name="title" required value="{{ item.title if item else '' }}"></label>
-    <label>Slug<input name="slug" value="{{ item.slug if item else '' }}" placeholder="se genera automáticamente"></label>
+    <details class="advanced-field">
+      <summary>Enlace de la página</summary>
+      <label>Texto del enlace interno
+        <input name="slug" value="{{ item.slug if item else '' }}" placeholder="Se genera automáticamente">
+        <small>Opcional. Úsalo solo si quieres cambiar la dirección pública de esta ficha.</small>
+      </label>
+    </details>
     <label>Categoría
       <select name="category">
         {% for value, label in content_categories %}
@@ -38,6 +44,13 @@
     <label>Texto alternativo<input name="image_alt" value="{{ item.image_alt if item else '' }}"></label>
     <label>Etiquetas <small>Máximo 4, separadas por coma.</small><input name="tags" value="{{ item.tags if item else '' }}"></label>
   </div>
-  <button class="button" type="submit">Guardar</button>
+  <div class="admin-form-actions">
+    <button class="button" type="submit" name="action" value="save">Guardar</button>
+    <button class="button ghost" type="submit" name="action" value="save_preview">Guardar y ver cómo quedó</button>
+    {% if item and item.status == "published" %}
+    <a class="admin-button secondary" href="/actualidad/{{ item.slug }}" target="_blank" rel="noopener">Ver publicación</a>
+    {% endif %}
+  </div>
 </form>
+<p class="session-note">Si tu sesión vence, el sistema te pedirá iniciar sesión antes de guardar cambios. Mantén una copia del texto si vas a dejar el formulario abierto mucho tiempo.</p>
 {% endblock %}
