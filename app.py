@@ -196,10 +196,7 @@ def create_app() -> Flask:
     def admin_content_preview(kind: str, record_id: int):
         if kind not in {"actualidad", "agenda"}:
             abort(404)
-        item = query_one("SELECT * FROM content WHERE id = ? AND kind = ?", [record_id, kind])
-        if not item:
-            abort(404)
-        return render_template("content_detail.html", item=item, admin_preview=True)
+        return redirect(url_for("admin_content_saved", kind=kind, record_id=record_id))
 
     @app.get("/tramites")
     def tramites():
@@ -1088,10 +1085,10 @@ def admin_required(view: Callable[..., Any]) -> Callable[..., Any]:
 
 
 def redirect_after_content_save(kind: str, record_id: int) -> Any:
-    action = request.form.get("action", "save")
-    if action == "save_preview":
-        return redirect(url_for("admin_content_preview", kind=kind, record_id=record_id))
-    return redirect(url_for("admin_content_edit", kind=kind, record_id=record_id))
+    action = request.form.get("action", "save_review")
+    if action == "save_continue":
+        return redirect(url_for("admin_content_edit", kind=kind, record_id=record_id))
+    return redirect(url_for("admin_content_saved", kind=kind, record_id=record_id))
 
 
 def get_setting(key: str, default: str = "") -> str:

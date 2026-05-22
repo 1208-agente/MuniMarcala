@@ -646,29 +646,6 @@ button {
   padding: clamp(2.5rem, 6vw, 5rem) 1rem;
 }
 
-.public-admin-bar {
-  align-items: center;
-  background: #0f2f24;
-  color: #fff;
-  display: flex;
-  flex-wrap: wrap;
-  gap: .75rem;
-  justify-content: center;
-  padding: .8rem 1rem;
-}
-
-.public-admin-bar span {
-  font-weight: 900;
-}
-
-.public-admin-bar a {
-  border: 1px solid rgba(255, 255, 255, .35);
-  border-radius: 999px;
-  color: #fff;
-  font-weight: 900;
-  padding: .45rem .8rem;
-}
-
 .article header {
   margin-bottom: 1.5rem;
 }
@@ -1121,6 +1098,20 @@ button {
 
 .saved-actions {
   padding: 1rem;
+}
+
+.content-review-card {
+  margin-top: 1.2rem;
+}
+
+.review-image {
+  width: 100%;
+  max-height: 520px;
+  object-fit: cover;
+}
+
+.review-body {
+  padding: 1.2rem;
 }
 
 @media (max-width: 1050px) {

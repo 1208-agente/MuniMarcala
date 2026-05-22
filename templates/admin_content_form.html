@@ -45,8 +45,8 @@
     <label>Etiquetas <small>Máximo 4, separadas por coma.</small><input name="tags" value="{{ item.tags if item else '' }}"></label>
   </div>
   <div class="admin-form-actions">
-    <button class="button" type="submit" name="action" value="save">Guardar</button>
-    <button class="button ghost" type="submit" name="action" value="save_preview">Guardar y ver cómo quedó</button>
+    <button class="button" type="submit" name="action" value="save_review">Guardar y revisar</button>
+    <button class="button ghost" type="submit" name="action" value="save_continue">Guardar y seguir editando</button>
     {% if item and item.status == "published" %}
     <a class="admin-button secondary" href="/actualidad/{{ item.slug }}" target="_blank" rel="noopener">Ver publicación</a>
     {% endif %}

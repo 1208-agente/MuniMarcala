@@ -2,9 +2,9 @@
 {% block content %}
 <section class="admin-feed-hero compact">
   <div>
-    <p class="eyebrow">Guardado</p>
+    <p class="eyebrow">Guardado y revisión</p>
     <h1>{{ item.title }}</h1>
-    <p>La ficha fue guardada correctamente. Revisa cómo quedó o vuelve al formulario para seguir ajustando el contenido.</p>
+    <p>Esta es una página temporal del panel. Aquí puedes revisar el contenido completo recién guardado antes de volver a editar o abrir la publicación pública.</p>
   </div>
 </section>
 
@@ -21,11 +21,31 @@
     </div>
   </div>
   <div class="admin-form-actions saved-actions">
+    <a class="button" href="/admin/{{ kind }}/{{ item.id }}">Volver a editar</a>
     {% if public_url %}
-    <a class="button" href="{{ public_url }}" target="_blank" rel="noopener">Ver publicación pública</a>
+    <a class="admin-button secondary" href="{{ public_url }}" target="_blank" rel="noopener">Abrir publicación pública</a>
     {% endif %}
-    <a class="admin-button secondary" href="/admin/{{ kind }}/{{ item.id }}">Volver a editar</a>
     <a class="admin-button secondary" href="/admin">Volver al panel</a>
   </div>
+</section>
+
+<section class="admin-feed-card content-review-card">
+  <div class="admin-feed-card-head">
+    <div>
+      <span>{{ item.category|category_label }} · {{ item.status|status_label }}</span>
+      <h2>{{ item.title }}</h2>
+      <p>{{ item.summary }}</p>
+      <small>{{ item.published_at|date_label }}</small>
+    </div>
+  </div>
+  {% if item.image_path %}
+  <img class="review-image" src="{{ asset_url(item.image_path) }}" alt="{{ item.image_alt or item.title }}">
+  {% endif %}
+  <div class="review-body rich-text">{{ item.body|replace('\n', '<br>')|safe }}</div>
+  {% if item.cta_url %}
+  <div class="saved-actions">
+    <a class="button" href="{{ item.cta_url }}" target="_blank" rel="noopener">{{ item.cta_label or "Más información" }}</a>
+  </div>
+  {% endif %}
 </section>
 {% endblock %}

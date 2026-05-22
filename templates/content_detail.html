@@ -1,13 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ item.title }} | {{ site_name }}{% endblock %}
 {% block content %}
-{% if current_user %}
-<div class="public-admin-bar">
-  <span>{% if admin_preview %}Vista de revisión del contenido guardado{% else %}Vista pública del contenido guardado{% endif %}</span>
-  <a href="/admin/{{ item.kind }}/{{ item.id }}">Volver a editar</a>
-  <a href="/admin">Panel municipal</a>
-</div>
-{% endif %}
 <article class="article">
   <header>
     <span class="pill">{{ item.category|category_label }}</span>
