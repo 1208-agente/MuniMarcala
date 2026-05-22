@@ -15,15 +15,12 @@
   </nav>
   <div class="document-list">
     {% for item in items %}
-    <article class="document-row">
+    <a class="document-row" href="/transparencia/{{ item.slug }}">
       <span>{{ item.category|category_label }} · {{ item.year or "" }}</span>
       <strong>{{ item.title }}</strong>
       <p>{{ item.description }}</p>
-      <div class="row-actions">
-        {% if item.file_path %}<a class="button small" href="{{ asset_url(item.file_path) }}" target="_blank" rel="noopener">Abrir PDF</a>{% endif %}
-        {% if item.external_url %}<a class="button ghost small" href="{{ item.external_url }}" target="_blank" rel="noopener">Enlace oficial</a>{% endif %}
-      </div>
-    </article>
+      <small>Ver detalle completo</small>
+    </a>
     {% endfor %}
   </div>
 </section>

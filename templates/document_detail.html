@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ item.title }} | {{ site_name }}{% endblock %}
+{% block content %}
+<article class="article">
+  <header>
+    <span class="pill">{{ item.category|category_label }}</span>
+    <h1>{{ item.title }}</h1>
+    <p>{{ item.description }}</p>
+    <small>{{ item.document_date|date_label }}{% if item.year %} · {{ item.year }}{% endif %}</small>
+  </header>
+  <div class="info-strip">
+    <section>
+      <strong>Dependencia</strong>
+      <p>{{ item.department or "Municipalidad de Marcala" }}</p>
+    </section>
+    <section>
+      <strong>Categoría</strong>
+      <p>{{ item.category|category_label }}</p>
+    </section>
+  </div>
+  <div class="row-actions detail-actions">
+    {% if item.file_path %}<a class="button" href="{{ asset_url(item.file_path) }}" target="_blank" rel="noopener">Abrir PDF</a>{% endif %}
+    {% if item.external_url %}<a class="button ghost" href="{{ item.external_url }}" target="_blank" rel="noopener">Enlace oficial</a>{% endif %}
+    <a class="admin-button secondary" href="/transparencia">Volver a transparencia</a>
+  </div>
+</article>
+{% endblock %}

@@ -8,13 +8,13 @@
 </section>
 <section class="section timeline">
   {% for item in items %}
-  <article>
+  <a class="timeline-item" href="/actualidad/{{ item.slug }}">
     <time>{{ item.event_date|date_label }}</time>
     <div>
-      <h2><a href="/actualidad/{{ item.slug }}">{{ item.title }}</a></h2>
+      <h2>{{ item.title }}</h2>
       <p>{{ item.summary }}</p>
     </div>
-  </article>
+  </a>
   {% endfor %}
 </section>
 {% endblock %}

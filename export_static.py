@@ -50,6 +50,8 @@ def public_routes() -> list[str]:
     routes.extend(f"/transparencia?categoria={key}" for key, _ in DOCUMENT_CATEGORIES)
     routes.extend(f"/actualidad/{row['slug']}" for row in query_all("SELECT slug FROM content WHERE status='published'"))
     routes.extend(f"/tramites/{row['slug']}" for row in query_all("SELECT slug FROM services WHERE status='published'"))
+    routes.extend(f"/transparencia/{row['slug']}" for row in query_all("SELECT slug FROM documents WHERE status='published'"))
+    routes.extend(f"/municipalidad/alcaldes/{row['slug']}" for row in query_all("SELECT slug FROM mayors WHERE status='published'"))
     return dedupe(routes)
 
 
@@ -80,8 +82,8 @@ def write_search_index() -> None:
     sources = [
         ("content", "Actualidad", "title", "summary", "body", "/actualidad/{slug}"),
         ("services", "Trámite", "title", "summary", "requirements", "/tramites/{slug}"),
-        ("documents", "Transparencia", "title", "description", "department", "/transparencia"),
-        ("mayors", "Municipalidad", "name", "biography", "period_start", "/municipalidad"),
+        ("documents", "Transparencia", "title", "description", "department", "/transparencia/{slug}"),
+        ("mayors", "Municipalidad", "name", "biography", "period_start", "/municipalidad/alcaldes/{slug}"),
     ]
     for table, label, title_field, summary_field, body_field, url_template in sources:
         for row in query_all(f"SELECT * FROM {table} WHERE status='published'"):

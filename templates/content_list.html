@@ -15,15 +15,15 @@
   </nav>
   <div class="card-grid">
     {% for item in items %}
-    <article class="news-card">
+    <a class="news-card" href="/actualidad/{{ item.slug }}">
       {% if item.image_path %}<img src="{{ asset_url(item.image_path) }}" alt="{{ item.image_alt or item.title }}">{% endif %}
       <div>
         <span class="pill">{{ item.category|category_label }}</span>
-        <h2><a href="/actualidad/{{ item.slug }}">{{ item.title }}</a></h2>
+        <h2>{{ item.title }}</h2>
         <p>{{ item.summary }}</p>
         <small>{{ item.published_at|date_label }}</small>
       </div>
-    </article>
+    </a>
     {% endfor %}
   </div>
 </section>

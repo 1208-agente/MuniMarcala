@@ -74,14 +74,14 @@
   </div>
   <div class="card-grid">
     {% for item in featured %}
-    <article class="news-card">
+    <a class="news-card" href="/actualidad/{{ item.slug }}">
       {% if item.image_path %}<img src="{{ asset_url(item.image_path) }}" alt="{{ item.image_alt or item.title }}">{% endif %}
       <div>
         <span class="pill">{{ item.category|category_label }}</span>
-        <h3><a href="/actualidad/{{ item.slug }}">{{ item.title }}</a></h3>
+        <h3>{{ item.title }}</h3>
         <p>{{ item.summary }}</p>
       </div>
-    </article>
+    </a>
     {% endfor %}
   </div>
 </section>
@@ -92,7 +92,7 @@
     <h2>Documentos recientes</h2>
     <div class="document-list">
       {% for doc in docs %}
-      <a href="/transparencia" class="document-row">
+      <a href="/transparencia/{{ doc.slug }}" class="document-row">
         <span>{{ doc.category|category_label }}</span>
         <strong>{{ doc.title }}</strong>
         <small>{{ doc.document_date|date_label }}</small>
@@ -103,9 +103,11 @@
   <div class="mayor-panel">
     <p class="eyebrow">Municipalidad</p>
     {% if current_mayor %}
-    {% if current_mayor.photo_path %}<img src="{{ asset_url(current_mayor.photo_path) }}" alt="{{ current_mayor.name }}">{% endif %}
-    <h2>{{ current_mayor.name }}</h2>
-    <p>{{ current_mayor.biography }}</p>
+    <a class="panel-link" href="/municipalidad/alcaldes/{{ current_mayor.slug }}">
+      {% if current_mayor.photo_path %}<img src="{{ asset_url(current_mayor.photo_path) }}" alt="{{ current_mayor.name }}">{% endif %}
+      <h2>{{ current_mayor.name }}</h2>
+      <p>{{ current_mayor.biography }}</p>
+    </a>
     {% endif %}
     <a class="button" href="/municipalidad">Historia y autoridades</a>
   </div>

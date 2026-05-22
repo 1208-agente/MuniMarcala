@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ item.name }} | {{ site_name }}{% endblock %}
+{% block content %}
+<article class="article mayor-detail">
+  <header>
+    <span class="pill">{{ "Actual" if item.is_current else "Autoridad municipal" }}</span>
+    <h1>{{ item.name }}</h1>
+    <p>{{ item.period_start }}{% if item.period_end %} - {{ item.period_end }}{% endif %}</p>
+  </header>
+  {% if item.photo_path %}<img class="article-image portrait-image" src="{{ asset_url(item.photo_path) }}" alt="{{ item.name }}">{% endif %}
+  <div class="rich-text">{{ item.biography|replace('\n', '<br>')|safe }}</div>
+  <div class="row-actions detail-actions">
+    <a class="admin-button secondary" href="/municipalidad#alcaldes">Volver a autoridades</a>
+  </div>
+</article>
+{% endblock %}

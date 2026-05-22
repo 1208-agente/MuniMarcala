@@ -191,6 +191,16 @@ def create_app() -> Flask:
             abort(404)
         return render_template("content_detail.html", item=item)
 
+    @app.get("/admin/<kind>/<int:record_id>/vista")
+    @login_required
+    def admin_content_preview(kind: str, record_id: int):
+        if kind not in {"actualidad", "agenda"}:
+            abort(404)
+        item = query_one("SELECT * FROM content WHERE id = ? AND kind = ?", [record_id, kind])
+        if not item:
+            abort(404)
+        return render_template("content_detail.html", item=item, admin_preview=True)
+
     @app.get("/tramites")
     def tramites():
         items = query_all("SELECT * FROM services WHERE status = 'published' ORDER BY title")
@@ -221,6 +231,13 @@ def create_app() -> Flask:
         )
         return render_template("documents.html", items=items, selected_category=category)
 
+    @app.get("/transparencia/<slug>")
+    def document_detail(slug: str):
+        item = query_one("SELECT * FROM documents WHERE slug = ? AND status = 'published'", [slug])
+        if not item:
+            abort(404)
+        return render_template("document_detail.html", item=item)
+
     @app.get("/municipalidad")
     def municipalidad():
         current_mayor = query_one(
@@ -240,6 +257,13 @@ def create_app() -> Flask:
             current_mayor=current_mayor,
             former_mayors=former_mayors,
         )
+
+    @app.get("/municipalidad/alcaldes/<slug>")
+    def mayor_detail(slug: str):
+        item = query_one("SELECT * FROM mayors WHERE slug = ? AND status = 'published'", [slug])
+        if not item:
+            abort(404)
+        return render_template("mayor_detail.html", item=item)
 
     @app.get("/agenda")
     def agenda():
@@ -1066,10 +1090,7 @@ def admin_required(view: Callable[..., Any]) -> Callable[..., Any]:
 def redirect_after_content_save(kind: str, record_id: int) -> Any:
     action = request.form.get("action", "save")
     if action == "save_preview":
-        item = query_one("SELECT slug, status FROM content WHERE id = ? AND kind = ?", [record_id, kind])
-        if item and item["status"] == "published":
-            return redirect(url_for("actualidad_detail", slug=item["slug"]))
-        return redirect(url_for("admin_content_saved", kind=kind, record_id=record_id))
+        return redirect(url_for("admin_content_preview", kind=kind, record_id=record_id))
     return redirect(url_for("admin_content_edit", kind=kind, record_id=record_id))
 
 
@@ -1473,14 +1494,14 @@ def search_records(query: str, tag: str) -> list[dict[str, str]]:
     sources = [
         ("content", "Actualidad", "title", "summary", "tags", "actualidad_detail"),
         ("services", "Trámite", "title", "summary", "tags", "tramite_detail"),
-        ("documents", "Transparencia", "title", "description", "tags", "transparencia"),
-        ("mayors", "Municipalidad", "name", "biography", "tags", "municipalidad"),
+        ("documents", "Transparencia", "title", "description", "tags", "document_detail"),
+        ("mayors", "Municipalidad", "name", "biography", "tags", "mayor_detail"),
     ]
     for table, label, title_field, summary_field, tag_field, endpoint in sources:
         for row in query_all(f"SELECT * FROM {table} WHERE status = 'published'"):
             haystack = normalize_text(" ".join(str(row[key] or "") for key in row.keys()))
             if needle in haystack:
-                url = url_for(endpoint, slug=row["slug"]) if endpoint in {"actualidad_detail", "tramite_detail"} else url_for(endpoint)
+                url = url_for(endpoint, slug=row["slug"])
                 results.append(
                     {
                         "label": label,

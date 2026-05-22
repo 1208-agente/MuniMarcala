@@ -15,20 +15,20 @@
   </div>
   <div class="people-grid">
     {% if current_mayor %}
-    <article class="person-card current">
+    <a class="person-card current" href="/municipalidad/alcaldes/{{ current_mayor.slug }}">
       {% if current_mayor.photo_path %}<img src="{{ asset_url(current_mayor.photo_path) }}" alt="{{ current_mayor.name }}">{% endif %}
       <span class="pill">Actual</span>
       <h3>{{ current_mayor.name }}</h3>
       <p>{{ current_mayor.biography }}</p>
-    </article>
+    </a>
     {% endif %}
     {% for mayor in former_mayors %}
-    <article class="person-card">
+    <a class="person-card" href="/municipalidad/alcaldes/{{ mayor.slug }}">
       {% if mayor.photo_path %}<img src="{{ asset_url(mayor.photo_path) }}" alt="{{ mayor.name }}">{% endif %}
       <span>{{ mayor.period_start }}{% if mayor.period_end %} - {{ mayor.period_end }}{% endif %}</span>
       <h3>{{ mayor.name }}</h3>
       <p>{{ mayor.biography }}</p>
-    </article>
+    </a>
     {% endfor %}
   </div>
 </section>
