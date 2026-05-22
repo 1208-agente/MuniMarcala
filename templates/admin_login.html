@@ -11,6 +11,9 @@
     <span class="brand-mark">MM</span>
     <h1>Acceso interno</h1>
     <p>Panel editorial de la Municipalidad de Marcala.</p>
+    {% if auth_provider == "supabase" %}
+    <p class="login-note">Acceso protegido con Supabase Auth.</p>
+    {% endif %}
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% for category, message in messages %}
     <div class="flash {{ category }}">{{ message }}</div>

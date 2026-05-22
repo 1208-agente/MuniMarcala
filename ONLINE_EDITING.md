@@ -3,7 +3,8 @@
 Esta configuración convierte el sitio municipal en una aplicación editable en línea:
 
 - Flask sirve el sitio público y el panel admin.
-- Supabase PostgreSQL guarda usuarios, publicaciones, trámites, documentos, alcaldes y auditoría.
+- Supabase Auth valida correos y contraseñas del panel.
+- Supabase PostgreSQL guarda perfiles internos, roles, publicaciones, trámites, documentos, alcaldes y auditoría.
 - Supabase Storage guarda imágenes y PDFs.
 - Cloudflare puede manejar dominio, DNS y HTTPS, pero no ejecuta Flask por sí solo.
 
@@ -36,7 +37,9 @@ En el host online configurar:
 ```text
 SECRET_KEY=un_valor_largo_y_seguro
 DATABASE_URL=postgresql://...
+AUTH_PROVIDER=supabase
 SUPABASE_URL=https://TU_PROYECTO.supabase.co
+SUPABASE_ANON_KEY=ey...
 SUPABASE_SERVICE_ROLE_KEY=ey...
 SUPABASE_BUCKET=municipalidad-marcala
 INITIAL_ADMIN_EMAIL=correo@municipalidad.hn
@@ -46,8 +49,11 @@ SESSION_COOKIE_SECURE=1
 
 Notas:
 
+- `AUTH_PROVIDER=supabase` activa el login con Supabase Auth. Sin esa variable, el sistema usa el login local.
+- `SUPABASE_ANON_KEY` se usa para validar email y contraseña contra Supabase Auth.
 - `SUPABASE_SERVICE_ROLE_KEY` es secreto. No debe ir en el navegador ni en GitHub público.
-- `INITIAL_ADMIN_PASSWORD` solo se usa para crear el primer admin cuando la base está vacía.
+- `INITIAL_ADMIN_EMAIL` crea el perfil local del primer admin cuando la base está vacía.
+- En Supabase Auth debes crear un usuario con ese mismo correo y contraseña antes del primer login.
 - Después de entrar por primera vez, crear un administrador municipal definitivo y cambiar/pausar el temporal.
 
 ## 4. Publicar Flask
@@ -70,7 +76,7 @@ Root directory: municipalidad_marcala
 
 Si el repositorio contiene solo `municipalidad_marcala`, el root directory puede quedar vacío.
 
-## 5. Login
+## 5. Login y contraseñas
 
 Cuando esté desplegado:
 
@@ -78,12 +84,14 @@ Cuando esté desplegado:
 https://tu-dominio/admin/login
 ```
 
-El primer usuario será:
+El primer usuario debe existir en dos lugares:
 
-```text
-INITIAL_ADMIN_EMAIL
-INITIAL_ADMIN_PASSWORD
-```
+1. En **Supabase Auth > Users**, con email y contraseña.
+2. En la tabla interna `users`, que la app crea automáticamente con `INITIAL_ADMIN_EMAIL` cuando la base está vacía.
+
+Supabase guarda y valida las contraseñas. La tabla interna `users` queda para controlar rol (`admin` o `editor`) y estado (`active`, `paused`, etc.).
+
+Cuando crees usuarios desde el panel, la app también intentará crearlos/actualizarlos en Supabase Auth usando `SUPABASE_SERVICE_ROLE_KEY`.
 
 ## 6. Cloudflare
 

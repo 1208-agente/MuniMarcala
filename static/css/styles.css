@@ -782,6 +782,15 @@ button {
   margin-bottom: .3rem;
 }
 
+.login-note {
+  border-left: 4px solid var(--green);
+  background: #f0fdf4;
+  color: var(--green);
+  font-size: .92rem;
+  font-weight: 900;
+  padding: .65rem .75rem;
+}
+
 .admin-body {
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);

@@ -78,13 +78,17 @@ Esta fase ya está preparada en el código. Ver detalles en `ONLINE_EDITING.md`.
 ```text
 SECRET_KEY=
 DATABASE_URL=
+AUTH_PROVIDER=supabase
 SUPABASE_URL=
+SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 SUPABASE_BUCKET=
 INITIAL_ADMIN_EMAIL=
 INITIAL_ADMIN_PASSWORD=
 SESSION_COOKIE_SECURE=1
 ```
+
+Para el primer acceso, crear también ese correo en **Supabase Auth > Users**. La contraseña real será gestionada por Supabase Auth; la tabla interna solo mantiene rol y estado del usuario.
 
 ## Fase 3: dominio y seguridad
 
