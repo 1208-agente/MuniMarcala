@@ -20,20 +20,20 @@ Esta fase usa la carpeta generada `public_build`. No incluye panel admin en lín
 ### Generar la versión pública
 
 ```powershell
-cd municipalidad_marcala
+cd D:\municipalidad_marcala_repo
 python export_static.py
 ```
 
 La carpeta para subir es:
 
 ```text
-municipalidad_marcala/public_build
+D:\municipalidad_marcala_repo\public_build
 ```
 
 ### Probar localmente
 
 ```powershell
-cd municipalidad_marcala
+cd D:\municipalidad_marcala_repo
 python -m http.server 8088 --directory public_build
 ```
 
@@ -53,7 +53,7 @@ http://127.0.0.1:8088/
    - Framework preset: `None`
    - Build command: vacío, si subes `public_build` ya generado.
    - Output directory: `/` si el repositorio contiene solo el contenido de `public_build`.
-   - Output directory: `municipalidad_marcala/public_build` si subes todo el proyecto.
+   - Output directory: `public_build` si subes todo este repositorio (`municipio-site`).
 6. Publicar.
 
 ### Limitaciones de esta fase

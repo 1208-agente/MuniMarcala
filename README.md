@@ -16,7 +16,7 @@ Primera versión Flask del sitio institucional de la Municipalidad de Marcala.
 ## Ejecutar localmente
 
 ```powershell
-cd municipalidad_marcala
+cd D:\municipalidad_marcala_repo
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt

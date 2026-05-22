@@ -71,10 +71,10 @@ Configuración típica:
 ```text
 Build command: pip install -r requirements.txt
 Start command: gunicorn app:app
-Root directory: municipalidad_marcala
+Root directory: vacío, si el repositorio es `municipio-site` y contiene `app.py` en la raíz.
 ```
 
-Si el repositorio contiene solo `municipalidad_marcala`, el root directory puede quedar vacío.
+El repositorio actual `r92ubuntu/municipio-site` tiene `app.py` en la raíz, por eso no uses `municipalidad_marcala` como root directory.
 
 ## 5. Login y contraseñas
 
