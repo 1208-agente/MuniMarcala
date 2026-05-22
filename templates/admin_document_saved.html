@@ -1,0 +1,50 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<section class="admin-feed-hero compact">
+  <div>
+    <p class="eyebrow">Guardado y revisión</p>
+    <h1>{{ item.title }}</h1>
+    <p>Esta es una página temporal del panel para revisar el documento recién guardado.</p>
+  </div>
+</section>
+
+<section class="admin-feed-card saved-card">
+  <div class="admin-feed-card-head">
+    <div>
+      <span>{{ item.category|category_label }} · {{ item.status|status_label }}</span>
+      <h2>Opciones rápidas</h2>
+      {% if not public_url %}
+      <p>Este documento no se muestra al público porque está como {{ item.status|status_label }}.</p>
+      {% else %}
+      <p>También puedes abrir la publicación pública en otra pestaña.</p>
+      {% endif %}
+    </div>
+  </div>
+  <div class="admin-form-actions saved-actions">
+    <a class="button" href="/admin/documentos/{{ item.id }}">Volver a editar</a>
+    {% if public_url %}<a class="admin-button secondary" href="{{ public_url }}" target="_blank" rel="noopener">Abrir publicación pública</a>{% endif %}
+    <a class="admin-button secondary" href="/admin">Volver al panel</a>
+  </div>
+</section>
+
+<section class="admin-feed-card content-review-card">
+  <div class="admin-feed-card-head">
+    <div>
+      <span>{{ item.category|category_label }}{% if item.year %} · {{ item.year }}{% endif %}</span>
+      <h2>{{ item.title }}</h2>
+      <p>{{ item.description }}</p>
+      <small>{{ item.document_date|date_label }}</small>
+    </div>
+  </div>
+  <div class="review-body">
+    <div class="detail-grid">
+      <section><strong>Dependencia</strong><p>{{ item.department or "Municipalidad de Marcala" }}</p></section>
+      <section><strong>Categoría</strong><p>{{ item.category|category_label }}</p></section>
+    </div>
+    <div class="admin-form-actions">
+      {% if item.file_path %}<a class="button" href="{{ asset_url(item.file_path) }}" target="_blank" rel="noopener">Abrir PDF</a>{% endif %}
+      {% if item.external_url %}<a class="button ghost" href="{{ item.external_url }}" target="_blank" rel="noopener">Enlace oficial</a>{% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

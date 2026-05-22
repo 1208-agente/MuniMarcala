@@ -1,0 +1,42 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<section class="admin-feed-hero compact">
+  <div>
+    <p class="eyebrow">Guardado y revisión</p>
+    <h1>{{ item.name }}</h1>
+    <p>Esta es una página temporal del panel para revisar la biografía completa recién guardada.</p>
+  </div>
+</section>
+
+<section class="admin-feed-card saved-card">
+  <div class="admin-feed-card-head">
+    <div>
+      <span>{{ "Autoridad actual" if item.is_current else "Biografía" }} · {{ item.status|status_label }}</span>
+      <h2>Opciones rápidas</h2>
+      {% if not public_url %}
+      <p>Esta biografía no se muestra al público porque está como {{ item.status|status_label }}.</p>
+      {% else %}
+      <p>También puedes abrir la publicación pública en otra pestaña.</p>
+      {% endif %}
+    </div>
+  </div>
+  <div class="admin-form-actions saved-actions">
+    <a class="button" href="/admin/alcaldes/{{ item.id }}">Volver a editar</a>
+    {% if public_url %}<a class="admin-button secondary" href="{{ public_url }}" target="_blank" rel="noopener">Abrir publicación pública</a>{% endif %}
+    <a class="admin-button secondary" href="/admin">Volver al panel</a>
+  </div>
+</section>
+
+<section class="admin-feed-card content-review-card">
+  <div class="admin-feed-card-head">
+    <div>
+      <span>{{ item.period_start }}{% if item.period_end %} - {{ item.period_end }}{% endif %}</span>
+      <h2>{{ item.name }}</h2>
+    </div>
+  </div>
+  {% if item.photo_path %}
+  <img class="review-image portrait-image" src="{{ asset_url(item.photo_path) }}" alt="{{ item.name }}">
+  {% endif %}
+  <div class="review-body rich-text">{{ item.biography|replace('\n', '<br>')|safe }}</div>
+</section>
+{% endblock %}

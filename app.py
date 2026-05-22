@@ -436,7 +436,7 @@ def create_app() -> Flask:
         if request.method == "POST":
             record_id = save_service()
             flash("Trámite creado.", "success")
-            return redirect(url_for("admin_service_edit", record_id=record_id))
+            return redirect_after_record_save("admin_service_edit", "admin_service_saved", record_id)
         return render_template("admin_service_form.html", item=None)
 
     @app.route("/admin/tramites/<int:record_id>", methods=["GET", "POST"])
@@ -448,8 +448,17 @@ def create_app() -> Flask:
         if request.method == "POST":
             save_service(item)
             flash("Trámite actualizado.", "success")
-            return redirect(url_for("admin_service_edit", record_id=record_id))
+            return redirect_after_record_save("admin_service_edit", "admin_service_saved", record_id)
         return render_template("admin_service_form.html", item=item)
+
+    @app.get("/admin/tramites/<int:record_id>/guardado")
+    @login_required
+    def admin_service_saved(record_id: int):
+        item = query_one("SELECT * FROM services WHERE id = ?", [record_id])
+        if not item:
+            abort(404)
+        public_url = url_for("tramite_detail", slug=item["slug"]) if item["status"] == "published" else ""
+        return render_template("admin_service_saved.html", item=item, public_url=public_url)
 
     @app.get("/admin/documentos")
     @login_required
@@ -463,7 +472,7 @@ def create_app() -> Flask:
         if request.method == "POST":
             record_id = save_document()
             flash("Documento creado.", "success")
-            return redirect(url_for("admin_document_edit", record_id=record_id))
+            return redirect_after_record_save("admin_document_edit", "admin_document_saved", record_id)
         return render_template("admin_document_form.html", item=None)
 
     @app.route("/admin/documentos/<int:record_id>", methods=["GET", "POST"])
@@ -475,8 +484,17 @@ def create_app() -> Flask:
         if request.method == "POST":
             save_document(item)
             flash("Documento actualizado.", "success")
-            return redirect(url_for("admin_document_edit", record_id=record_id))
+            return redirect_after_record_save("admin_document_edit", "admin_document_saved", record_id)
         return render_template("admin_document_form.html", item=item)
+
+    @app.get("/admin/documentos/<int:record_id>/guardado")
+    @login_required
+    def admin_document_saved(record_id: int):
+        item = query_one("SELECT * FROM documents WHERE id = ?", [record_id])
+        if not item:
+            abort(404)
+        public_url = url_for("document_detail", slug=item["slug"]) if item["status"] == "published" else ""
+        return render_template("admin_document_saved.html", item=item, public_url=public_url)
 
     @app.get("/admin/alcaldes")
     @login_required
@@ -490,7 +508,7 @@ def create_app() -> Flask:
         if request.method == "POST":
             record_id = save_mayor()
             flash("Biografía creada.", "success")
-            return redirect(url_for("admin_mayor_edit", record_id=record_id))
+            return redirect_after_record_save("admin_mayor_edit", "admin_mayor_saved", record_id)
         return render_template("admin_mayor_form.html", item=None)
 
     @app.route("/admin/alcaldes/<int:record_id>", methods=["GET", "POST"])
@@ -502,8 +520,17 @@ def create_app() -> Flask:
         if request.method == "POST":
             save_mayor(item)
             flash("Biografía actualizada.", "success")
-            return redirect(url_for("admin_mayor_edit", record_id=record_id))
+            return redirect_after_record_save("admin_mayor_edit", "admin_mayor_saved", record_id)
         return render_template("admin_mayor_form.html", item=item)
+
+    @app.get("/admin/alcaldes/<int:record_id>/guardado")
+    @login_required
+    def admin_mayor_saved(record_id: int):
+        item = query_one("SELECT * FROM mayors WHERE id = ?", [record_id])
+        if not item:
+            abort(404)
+        public_url = url_for("mayor_detail", slug=item["slug"]) if item["status"] == "published" else ""
+        return render_template("admin_mayor_saved.html", item=item, public_url=public_url)
 
     @app.get("/admin/usuarios")
     @admin_required
@@ -1089,6 +1116,13 @@ def redirect_after_content_save(kind: str, record_id: int) -> Any:
     if action == "save_continue":
         return redirect(url_for("admin_content_edit", kind=kind, record_id=record_id))
     return redirect(url_for("admin_content_saved", kind=kind, record_id=record_id))
+
+
+def redirect_after_record_save(edit_endpoint: str, saved_endpoint: str, record_id: int) -> Any:
+    action = request.form.get("action", "save_review")
+    if action == "save_continue":
+        return redirect(url_for(edit_endpoint, record_id=record_id))
+    return redirect(url_for(saved_endpoint, record_id=record_id))
 
 
 def get_setting(key: str, default: str = "") -> str:

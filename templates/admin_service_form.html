@@ -23,6 +23,12 @@
   <label>Requisitos <small>Un requisito por línea.</small><textarea name="requirements" rows="6">{{ item.requirements if item else '' }}</textarea></label>
   <label>Pasos <small>Un paso por línea.</small><textarea name="steps" rows="6">{{ item.steps if item else '' }}</textarea></label>
   <label>Etiquetas <small>Máximo 4, separadas por coma.</small><input name="tags" value="{{ item.tags if item else '' }}"></label>
-  <button class="button" type="submit">Guardar</button>
+  <div class="admin-form-actions">
+    <button class="button" type="submit" name="action" value="save_review">Guardar y revisar</button>
+    <button class="button ghost" type="submit" name="action" value="save_continue">Guardar y seguir editando</button>
+    {% if item and item.status == "published" %}
+    <a class="admin-button secondary" href="/tramites/{{ item.slug }}" target="_blank" rel="noopener">Ver publicación</a>
+    {% endif %}
+  </div>
 </form>
 {% endblock %}

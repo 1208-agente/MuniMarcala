@@ -1,0 +1,53 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<section class="admin-feed-hero compact">
+  <div>
+    <p class="eyebrow">Guardado y revisión</p>
+    <h1>{{ item.title }}</h1>
+    <p>Esta es una página temporal del panel para revisar el trámite completo recién guardado.</p>
+  </div>
+</section>
+
+<section class="admin-feed-card saved-card">
+  <div class="admin-feed-card-head">
+    <div>
+      <span>{{ item.department or "Municipalidad" }} · {{ item.status|status_label }}</span>
+      <h2>Opciones rápidas</h2>
+      {% if not public_url %}
+      <p>Este trámite no se muestra al público porque está como {{ item.status|status_label }}.</p>
+      {% else %}
+      <p>También puedes abrir la publicación pública en otra pestaña.</p>
+      {% endif %}
+    </div>
+  </div>
+  <div class="admin-form-actions saved-actions">
+    <a class="button" href="/admin/tramites/{{ item.id }}">Volver a editar</a>
+    {% if public_url %}<a class="admin-button secondary" href="{{ public_url }}" target="_blank" rel="noopener">Abrir publicación pública</a>{% endif %}
+    <a class="admin-button secondary" href="/admin">Volver al panel</a>
+  </div>
+</section>
+
+<section class="admin-feed-card content-review-card">
+  <div class="admin-feed-card-head">
+    <div>
+      <span>{{ item.department or "Municipalidad" }}</span>
+      <h2>{{ item.title }}</h2>
+      <p>{{ item.summary }}</p>
+    </div>
+  </div>
+  <div class="review-body">
+    <div class="detail-grid">
+      <section><strong>Costo</strong><p>{{ item.cost or "Consultar en la Municipalidad" }}</p></section>
+      <section><strong>Tiempo estimado</strong><p>{{ item.estimated_time or "Según trámite" }}</p></section>
+      <section><strong>Horario</strong><p>{{ item.schedule or "Horario administrativo" }}</p></section>
+      <section><strong>Contacto</strong><p>{{ item.contact or "Municipalidad de Marcala" }}</p></section>
+    </div>
+    <div class="rich-text">
+      <h3>Requisitos</h3>
+      {{ item.requirements|replace('\n', '<br>')|safe }}
+      <h3>Pasos</h3>
+      {{ item.steps|replace('\n', '<br>')|safe }}
+    </div>
+  </div>
+</section>
+{% endblock %}
