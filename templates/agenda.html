@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Agenda | {{ site_name }}{% endblock %}
+{% block content %}
+<section class="page-hero compact">
+  <p class="eyebrow">Agenda</p>
+  <h1>Actividades municipales</h1>
+  <p>Fechas y convocatorias de interés público.</p>
+</section>
+<section class="section timeline">
+  {% for item in items %}
+  <article>
+    <time>{{ item.event_date|date_label }}</time>
+    <div>
+      <h2><a href="/actualidad/{{ item.slug }}">{{ item.title }}</a></h2>
+      <p>{{ item.summary }}</p>
+    </div>
+  </article>
+  {% endfor %}
+</section>
+{% endblock %}

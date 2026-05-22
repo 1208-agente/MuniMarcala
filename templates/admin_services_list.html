@@ -1,0 +1,7 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<header class="admin-feed-hero compact"><div><p class="eyebrow">Trámites</p><h1>Feed de trámites</h1><p>Requisitos, pasos, costos y dependencias en fichas editables.</p></div><a class="button" href="/admin/tramites/nuevo">Nuevo trámite</a></header>
+<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Trámite</th><th>Dependencia</th><th>Estado</th><th></th></tr></thead><tbody>
+{% for item in items %}<tr><td>{{ item.title }}</td><td>{{ item.department }}</td><td>{{ item.status|status_label }}</td><td><a href="/admin/tramites/{{ item.id }}">Editar</a></td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

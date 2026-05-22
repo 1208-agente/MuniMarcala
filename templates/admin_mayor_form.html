@@ -1,0 +1,18 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<header class="admin-feed-hero compact"><div><p class="eyebrow">Municipalidad</p><h1>{{ "Editar" if item else "Nueva" }} biografía</h1><p>Actualiza fotografía, periodo y reseña pública.</p></div><a class="admin-button secondary" href="/admin">Volver</a></header>
+<form class="admin-form" method="post" enctype="multipart/form-data">
+  <div class="form-grid">
+    <label>Nombre<input name="name" required value="{{ item.name if item else '' }}"></label>
+    <label>Slug<input name="slug" value="{{ item.slug if item else '' }}"></label>
+    <label>Inicio de periodo<input name="period_start" value="{{ item.period_start if item else '' }}"></label>
+    <label>Fin de periodo<input name="period_end" value="{{ item.period_end if item else '' }}"></label>
+    <label>Estado<select name="status">{% for value, label in statuses %}<option value="{{ value }}" {{ 'selected' if item and item.status == value else '' }}>{{ label }}</option>{% endfor %}</select></label>
+    <label>Foto<input type="file" name="photo_file" accept=".jpg,.jpeg,.png,.webp"></label>
+    <label class="check"><input type="checkbox" name="is_current" {{ 'checked' if item and item.is_current else '' }}> Es la autoridad actual</label>
+  </div>
+  <label>Biografía<textarea name="biography" rows="8">{{ item.biography if item else '' }}</textarea></label>
+  <label>Etiquetas <small>Máximo 4, separadas por coma.</small><input name="tags" value="{{ item.tags if item else '' }}"></label>
+  <button class="button" type="submit">Guardar</button>
+</form>
+{% endblock %}

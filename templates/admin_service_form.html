@@ -1,0 +1,23 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<header class="admin-feed-hero compact"><div><p class="eyebrow">Trámites</p><h1>{{ "Editar" if item else "Nuevo" }} trámite</h1><p>Completa la ficha con requisitos y pasos claros para el ciudadano.</p></div><a class="admin-button secondary" href="/admin">Volver</a></header>
+<form class="admin-form" method="post">
+  <div class="form-grid">
+    <label>Nombre<input name="title" required value="{{ item.title if item else '' }}"></label>
+    <label>Slug<input name="slug" value="{{ item.slug if item else '' }}"></label>
+    <label>Dependencia<input name="department" value="{{ item.department if item else '' }}"></label>
+    <label>Estado<select name="status">{% for value, label in statuses %}<option value="{{ value }}" {{ 'selected' if item and item.status == value else '' }}>{{ label }}</option>{% endfor %}</select></label>
+    <label>Costo<input name="cost" value="{{ item.cost if item else '' }}"></label>
+    <label>Tiempo estimado<input name="estimated_time" value="{{ item.estimated_time if item else '' }}"></label>
+    <label>Horario<input name="schedule" value="{{ item.schedule if item else '' }}"></label>
+    <label>Ubicación<input name="location" value="{{ item.location if item else '' }}"></label>
+    <label>Contacto<input name="contact" value="{{ item.contact if item else '' }}"></label>
+    <label>PDF o enlace relacionado<input name="document_url" value="{{ item.document_url if item else '' }}"></label>
+  </div>
+  <label>Resumen<textarea name="summary" rows="3">{{ item.summary if item else '' }}</textarea></label>
+  <label>Requisitos <small>Un requisito por línea.</small><textarea name="requirements" rows="6">{{ item.requirements if item else '' }}</textarea></label>
+  <label>Pasos <small>Un paso por línea.</small><textarea name="steps" rows="6">{{ item.steps if item else '' }}</textarea></label>
+  <label>Etiquetas <small>Máximo 4, separadas por coma.</small><input name="tags" value="{{ item.tags if item else '' }}"></label>
+  <button class="button" type="submit">Guardar</button>
+</form>
+{% endblock %}

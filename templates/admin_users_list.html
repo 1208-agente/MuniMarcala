@@ -1,0 +1,7 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<header class="admin-feed-hero compact"><div><p class="eyebrow">Usuarios</p><h1>Accesos internos</h1><p>Administradores y editores con correo y contraseña.</p></div><a class="button" href="/admin/usuarios/nuevo">Nuevo usuario</a></header>
+<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th></th></tr></thead><tbody>
+{% for item in items %}<tr><td>{{ item.name }}</td><td>{{ item.email }}</td><td>{{ item.role }}</td><td>{{ item.status }}</td><td><a href="/admin/usuarios/{{ item.id }}">Editar</a></td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

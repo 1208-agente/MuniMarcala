@@ -1,0 +1,7 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<header class="admin-feed-hero compact"><div><p class="eyebrow">Transparencia</p><h1>Feed de documentos</h1><p>PDFs, informes, actas y enlaces públicos ordenados por ficha.</p></div><a class="button" href="/admin/documentos/nuevo">Nuevo documento</a></header>
+<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Documento</th><th>Categoría</th><th>Año</th><th>Estado</th><th></th></tr></thead><tbody>
+{% for item in items %}<tr><td>{{ item.title }}</td><td>{{ item.category|category_label }}</td><td>{{ item.year }}</td><td>{{ item.status|status_label }}</td><td><a href="/admin/documentos/{{ item.id }}">Editar</a></td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

@@ -1,0 +1,7 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<header class="admin-feed-hero compact"><div><p class="eyebrow">Municipalidad</p><h1>Feed histórico</h1><p>Biografías, autoridad actual e historia institucional.</p></div><a class="button" href="/admin/alcaldes/nuevo">Nueva biografía</a></header>
+<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Nombre</th><th>Periodo</th><th>Actual</th><th>Estado</th><th></th></tr></thead><tbody>
+{% for item in items %}<tr><td>{{ item.name }}</td><td>{{ item.period_start }} {{ item.period_end }}</td><td>{{ "Sí" if item.is_current else "No" }}</td><td>{{ item.status|status_label }}</td><td><a href="/admin/alcaldes/{{ item.id }}">Editar</a></td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

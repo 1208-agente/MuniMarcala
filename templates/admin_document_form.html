@@ -1,0 +1,20 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<header class="admin-feed-hero compact"><div><p class="eyebrow">Transparencia</p><h1>{{ "Editar" if item else "Nuevo" }} documento</h1><p>Sube un PDF o registra un enlace oficial, con categoría y fecha.</p></div><a class="admin-button secondary" href="/admin">Volver</a></header>
+<form class="admin-form" method="post" enctype="multipart/form-data">
+  <div class="form-grid">
+    <label>Título<input name="title" required value="{{ item.title if item else '' }}"></label>
+    <label>Slug<input name="slug" value="{{ item.slug if item else '' }}"></label>
+    <label>Categoría<select name="category">{% for value, label in document_categories %}<option value="{{ value }}" {{ 'selected' if item and item.category == value else '' }}>{{ label }}</option>{% endfor %}</select></label>
+    <label>Fecha del documento<input type="date" name="document_date" value="{{ item.document_date if item else '' }}"></label>
+    <label>Año<input name="year" inputmode="numeric" value="{{ item.year if item else '' }}"></label>
+    <label>Dependencia<input name="department" value="{{ item.department if item else '' }}"></label>
+    <label>Estado<select name="status">{% for value, label in statuses %}<option value="{{ value }}" {{ 'selected' if item and item.status == value else '' }}>{{ label }}</option>{% endfor %}</select></label>
+    <label>PDF<input type="file" name="document_file" accept=".pdf"></label>
+    <label>Enlace externo<input name="external_url" value="{{ item.external_url if item else '' }}"></label>
+  </div>
+  <label>Descripción<textarea name="description" rows="4">{{ item.description if item else '' }}</textarea></label>
+  <label>Etiquetas <small>Máximo 4, separadas por coma.</small><input name="tags" value="{{ item.tags if item else '' }}"></label>
+  <button class="button" type="submit">Guardar</button>
+</form>
+{% endblock %}

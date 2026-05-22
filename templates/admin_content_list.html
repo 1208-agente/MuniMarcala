@@ -1,0 +1,27 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<header class="admin-feed-hero compact">
+  <div>
+    <p class="eyebrow">{{ "Agenda" if kind == "agenda" else "Actualidad" }}</p>
+    <h1>Feed de publicaciones</h1>
+    <p>Edita entradas existentes o crea una nueva ficha.</p>
+  </div>
+  <a class="button" href="/admin/{{ kind }}/nuevo">Nueva publicación</a>
+</header>
+<div class="admin-table-wrap">
+  <table class="admin-table">
+    <thead><tr><th>Título</th><th>Categoría</th><th>Estado</th><th>Fecha</th><th></th></tr></thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td>{{ item.title }}</td>
+        <td>{{ item.category|category_label }}</td>
+        <td>{{ item.status|status_label }}</td>
+        <td>{{ (item.event_date if kind == "agenda" else item.published_at)|date_label }}</td>
+        <td><a href="/admin/{{ kind }}/{{ item.id }}">Editar</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

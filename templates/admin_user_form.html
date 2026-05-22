@@ -1,0 +1,14 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<header class="admin-feed-hero compact"><div><p class="eyebrow">Usuarios</p><h1>{{ "Editar" if item else "Nuevo" }} usuario</h1><p>Define si tendrá rol de editor o administrador.</p></div><a class="admin-button secondary" href="/admin">Volver</a></header>
+<form class="admin-form" method="post">
+  <div class="form-grid">
+    <label>Nombre<input name="name" required value="{{ item.name if item else '' }}"></label>
+    <label>Correo<input type="email" name="email" required value="{{ item.email if item else '' }}"></label>
+    <label>Contraseña<input type="password" name="password" {{ '' if item else 'required' }} placeholder="{{ 'Dejar vacío para conservarla' if item else '' }}"></label>
+    <label>Rol<select name="role"><option value="editor" {{ 'selected' if item and item.role == 'editor' else '' }}>Editor</option><option value="admin" {{ 'selected' if item and item.role == 'admin' else '' }}>Administrador</option></select></label>
+    <label>Estado<select name="status"><option value="active" {{ 'selected' if item and item.status == 'active' else '' }}>Activo</option><option value="paused" {{ 'selected' if item and item.status == 'paused' else '' }}>Pausado</option></select></label>
+  </div>
+  <button class="button" type="submit">Guardar</button>
+</form>
+{% endblock %}

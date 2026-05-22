@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Buscar | {{ site_name }}{% endblock %}
+{% block content %}
+<section class="page-hero compact">
+  <p class="eyebrow">Búsqueda</p>
+  <h1 data-static-search-title>{% if tag %}#{{ tag }}{% elif query %}{{ query }}{% else %}Buscar{% endif %}</h1>
+  <p>Resultados relacionados en trámites, actualidad, transparencia y municipalidad.</p>
+</section>
+<section class="section">
+  <form class="wide-search" action="/buscar" method="get">
+    <input type="search" name="q" value="{{ query }}" placeholder="Buscar en todo el sitio">
+    <button type="submit">Buscar</button>
+  </form>
+  <div class="document-list" data-static-results>
+    {% for item in results %}
+    <a class="document-row" href="{{ item.url }}">
+      <span>{{ item.label }}</span>
+      <strong>{{ item.title }}</strong>
+      <p>{{ item.summary }}</p>
+      {% if item.tags %}<small>{{ item.tags }}</small>{% endif %}
+    </a>
+    {% else %}
+    <p>No se encontraron resultados.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

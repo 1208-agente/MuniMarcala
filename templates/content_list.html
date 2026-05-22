@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Actualidad | {{ site_name }}{% endblock %}
+{% block content %}
+<section class="page-hero compact">
+  <p class="eyebrow">Actualidad</p>
+  <h1>Noticias, comunicados y obras municipales</h1>
+  <p>Información pública organizada por categorías.</p>
+</section>
+<section class="section">
+  <nav class="filters">
+    <a class="{{ 'active' if selected_category == 'todos' else '' }}" href="/actualidad">Todo</a>
+    {% for value, label in content_categories %}
+    <a class="{{ 'active' if selected_category == value else '' }}" href="/actualidad?categoria={{ value }}">{{ label }}</a>
+    {% endfor %}
+  </nav>
+  <div class="card-grid">
+    {% for item in items %}
+    <article class="news-card">
+      {% if item.image_path %}<img src="{{ asset_url(item.image_path) }}" alt="{{ item.image_alt or item.title }}">{% endif %}
+      <div>
+        <span class="pill">{{ item.category|category_label }}</span>
+        <h2><a href="/actualidad/{{ item.slug }}">{{ item.title }}</a></h2>
+        <p>{{ item.summary }}</p>
+        <small>{{ item.published_at|date_label }}</small>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

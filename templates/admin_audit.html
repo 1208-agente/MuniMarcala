@@ -1,0 +1,22 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<header class="admin-feed-hero compact"><div><p class="eyebrow">Auditoría</p><h1>Registro de edición</h1><p>Historial de acciones realizadas por usuarios internos.</p></div><a class="admin-button secondary" href="/admin">Volver</a></header>
+<div class="admin-table-wrap">
+  <table class="admin-table">
+    <thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Sección</th><th>Contenido</th><th>Detalle</th><th>IP</th></tr></thead>
+    <tbody>
+      {% for row in items %}
+      <tr>
+        <td>{{ row.created_at }}</td>
+        <td>{{ row.user_email }}</td>
+        <td>{{ row.action }}</td>
+        <td>{{ row.entity_type }}</td>
+        <td>{{ row.entity_title }}</td>
+        <td>{{ row.details }}</td>
+        <td>{{ row.ip }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

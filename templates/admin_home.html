@@ -1,0 +1,44 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<section class="admin-feed-hero">
+  <div>
+    <p class="eyebrow">Panel editorial</p>
+    <h1>Cargar y editar contenido</h1>
+    <p>Trabaja por fichas, como un feed: crea, edita, publica, pausa o archiva contenido sin tocar la estructura técnica del sitio.</p>
+  </div>
+</section>
+
+<section class="admin-feed-grid">
+  {% for section in sections %}
+  <article class="admin-feed-card">
+    <div class="admin-feed-card-head">
+      <div>
+        <span>{{ section.count }} registros</span>
+        <h2>{{ section.label }}</h2>
+        <p>{{ section.description }}</p>
+      </div>
+      <a class="admin-button" href="{{ section.new_url }}">Nuevo</a>
+    </div>
+    <div class="admin-feed-list">
+      {% for item in section.records %}
+      <a href="{{ section.edit_base }}/{{ item.id }}">
+        <strong>{{ item[section.title_field] }}</strong>
+        <span>
+          {% if section.meta_field == "category" %}
+            {{ item[section.meta_field]|category_label }}
+          {% elif "date" in section.meta_field %}
+            {{ item[section.meta_field]|date_label }}
+          {% else %}
+            {{ item[section.meta_field] or "editable" }}
+          {% endif %}
+          · {{ item.status|status_label }}
+        </span>
+      </a>
+      {% else %}
+      <p>No hay contenido cargado.</p>
+      {% endfor %}
+    </div>
+  </article>
+  {% endfor %}
+</section>
+{% endblock %}

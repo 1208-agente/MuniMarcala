@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Municipalidad | {{ site_name }}{% endblock %}
+{% block content %}
+<section class="page-hero compact">
+  <p class="eyebrow">Municipalidad</p>
+  <h1>{{ history_title }}</h1>
+  <p>{{ history_body }}</p>
+</section>
+<section class="section" id="alcaldes">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">Autoridades</p>
+      <h2>Alcaldes y biografías</h2>
+    </div>
+  </div>
+  <div class="people-grid">
+    {% if current_mayor %}
+    <article class="person-card current">
+      {% if current_mayor.photo_path %}<img src="{{ asset_url(current_mayor.photo_path) }}" alt="{{ current_mayor.name }}">{% endif %}
+      <span class="pill">Actual</span>
+      <h3>{{ current_mayor.name }}</h3>
+      <p>{{ current_mayor.biography }}</p>
+    </article>
+    {% endif %}
+    {% for mayor in former_mayors %}
+    <article class="person-card">
+      {% if mayor.photo_path %}<img src="{{ asset_url(mayor.photo_path) }}" alt="{{ mayor.name }}">{% endif %}
+      <span>{{ mayor.period_start }}{% if mayor.period_end %} - {{ mayor.period_end }}{% endif %}</span>
+      <h3>{{ mayor.name }}</h3>
+      <p>{{ mayor.biography }}</p>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

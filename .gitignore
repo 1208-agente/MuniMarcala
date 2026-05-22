@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+data/*.sqlite3
+uploads/images/*
+uploads/documents/*
+!uploads/images/.gitkeep
+!uploads/documents/.gitkeep
+server.out.log
+server.err.log
+static-server.out.log
+static-server.err.log

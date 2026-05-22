@@ -1,0 +1,43 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<header class="admin-feed-hero compact">
+  <div>
+    <p class="eyebrow">{{ "Agenda" if kind == "agenda" else "Actualidad" }}</p>
+    <h1>{{ "Editar" if item else "Nueva" }} publicación</h1>
+    <p>Este mismo formulario sirve para crear, actualizar, pausar o archivar la ficha.</p>
+  </div>
+  <a class="admin-button secondary" href="/admin">Volver</a>
+</header>
+<form class="admin-form" method="post" enctype="multipart/form-data">
+  <div class="form-grid">
+    <label>Título<input name="title" required value="{{ item.title if item else '' }}"></label>
+    <label>Slug<input name="slug" value="{{ item.slug if item else '' }}" placeholder="se genera automáticamente"></label>
+    <label>Categoría
+      <select name="category">
+        {% for value, label in content_categories %}
+        <option value="{{ value }}" {{ 'selected' if item and item.category == value else '' }}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Estado
+      <select name="status">
+        {% for value, label in statuses %}
+        <option value="{{ value }}" {{ 'selected' if item and item.status == value else '' }}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Fecha de publicación<input type="date" name="published_at" value="{{ item.published_at if item else '' }}"></label>
+    <label>Fecha de agenda<input type="date" name="event_date" value="{{ item.event_date if item else '' }}"></label>
+    <label>Texto del botón<input name="cta_label" value="{{ item.cta_label if item else '' }}" placeholder="Más información"></label>
+    <label>Enlace del botón<input name="cta_url" value="{{ item.cta_url if item else '' }}"></label>
+  </div>
+  <label>Resumen<textarea name="summary" rows="3">{{ item.summary if item else '' }}</textarea></label>
+  <label>Contenido<textarea name="body" rows="10">{{ item.body if item else '' }}</textarea></label>
+  <div class="form-grid">
+    <label>Imagen<input type="file" name="image_file" accept=".jpg,.jpeg,.png,.webp"></label>
+    <label>Texto alternativo<input name="image_alt" value="{{ item.image_alt if item else '' }}"></label>
+    <label>Etiquetas <small>Máximo 4, separadas por coma.</small><input name="tags" value="{{ item.tags if item else '' }}"></label>
+  </div>
+  <button class="button" type="submit">Guardar</button>
+</form>
+{% endblock %}

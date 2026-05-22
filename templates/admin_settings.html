@@ -1,0 +1,18 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<header class="admin-feed-hero compact"><div><p class="eyebrow">Configuración</p><h1>Contenido institucional</h1><p>Nombre, portada, historia y datos generales del sitio.</p></div><a class="admin-button secondary" href="/admin">Volver</a></header>
+<form class="admin-form" method="post" enctype="multipart/form-data">
+  <div class="form-grid">
+    <label>Nombre del sitio<input name="site_name" value="{{ settings.site_name }}"></label>
+    <label>Teléfono<input name="contact_phone" value="{{ settings.contact_phone }}"></label>
+    <label>Correo<input name="contact_email" value="{{ settings.contact_email }}"></label>
+    <label>Dirección<input name="contact_address" value="{{ settings.contact_address }}"></label>
+    <label>Imagen principal<input type="file" name="hero_image_file" accept=".jpg,.jpeg,.png,.webp"></label>
+  </div>
+  <label>Título de portada<input name="hero_title" value="{{ settings.hero_title }}"></label>
+  <label>Texto de portada<textarea name="hero_summary" rows="3">{{ settings.hero_summary }}</textarea></label>
+  <label>Título histórico<input name="history_title" value="{{ settings.history_title }}"></label>
+  <label>Historia municipal<textarea name="history_body" rows="10">{{ settings.history_body }}</textarea></label>
+  <button class="button" type="submit">Guardar configuración</button>
+</form>
+{% endblock %}

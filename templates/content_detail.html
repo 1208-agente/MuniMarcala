@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}{{ item.title }} | {{ site_name }}{% endblock %}
+{% block content %}
+<article class="article">
+  <header>
+    <span class="pill">{{ item.category|category_label }}</span>
+    <h1>{{ item.title }}</h1>
+    <p>{{ item.summary }}</p>
+    <small>{{ item.published_at|date_label }}</small>
+  </header>
+  {% if item.image_path %}<img class="article-image" src="{{ asset_url(item.image_path) }}" alt="{{ item.image_alt or item.title }}">{% endif %}
+  <div class="rich-text">{{ item.body|replace('\n', '<br>')|safe }}</div>
+  {% if item.cta_url %}
+  <a class="button" href="{{ item.cta_url }}" target="_blank" rel="noopener">{{ item.cta_label or "Más información" }}</a>
+  {% endif %}
+</article>
+{% endblock %}

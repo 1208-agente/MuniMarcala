@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Panel municipal{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="admin-feed-body">
+  <header class="admin-feed-header">
+    <a class="brand" href="/admin">
+      <span class="brand-mark">M</span>
+      <span>
+        <strong>Panel municipal</strong>
+        <small>{{ site_name }}</small>
+      </span>
+    </a>
+    <nav class="admin-feed-nav">
+      <a href="/">Ver sitio</a>
+      {% if current_user and current_user.role == 'admin' %}
+      <a href="/admin/configuracion">Configuración</a>
+      <a href="/admin/usuarios">Usuarios</a>
+      <a href="/admin/auditoria">Auditoría</a>
+      {% endif %}
+      <a href="/admin/logout">Salir</a>
+    </nav>
+  </header>
+
+  <main class="admin-feed-shell">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-stack">
+      {% for category, message in messages %}
+      <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

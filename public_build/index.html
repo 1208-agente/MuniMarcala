@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sitio oficial de la Municipalidad de Marcala con trámites, actualidad, transparencia y servicios.">
+  <title>Municipalidad de Marcala</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+  <div class="top-strip">
+    <a href="/privacidad">Transparencia y privacidad</a>
+    <a href="/">Inicio</a>
+  </div>
+  <header class="site-header">
+    <a class="brand" href="/">
+      <span class="brand-mark">M</span>
+      <span>
+        <strong>Municipalidad de Marcala</strong>
+        <small>Marcala, La Paz</small>
+      </span>
+    </a>
+    <button class="nav-toggle" type="button" aria-label="Abrir menú" aria-expanded="false" data-nav-toggle>
+      <span></span><span></span><span></span>
+    </button>
+    <form class="header-search" action="/buscar" method="get" role="search">
+      <input type="search" name="q" placeholder="Buscar" aria-label="Buscar en el sitio">
+      <button type="submit">Buscar</button>
+    </form>
+    <nav class="main-nav" data-nav>
+      <a href="/">Inicio</a>
+      <a href="/tramites">Trámites</a>
+      <details class="nav-dropdown">
+        <summary>Actualidad</summary>
+        <div>
+          <a href="/actualidad">Todas las publicaciones</a>
+          <a href="/actualidad?categoria=noticias">Noticias</a>
+          <a href="/actualidad?categoria=comunicados">Comunicados</a>
+          <a href="/actualidad?categoria=avisos">Avisos</a>
+          <a href="/actualidad?categoria=obras-y-proyectos">Obras y proyectos</a>
+          <a href="/agenda">Agenda municipal</a>
+        </div>
+      </details>
+      <details class="nav-dropdown">
+        <summary>Transparencia</summary>
+        <div>
+          <a href="/transparencia">Documentos públicos</a>
+          <a href="/transparencia?categoria=presupuesto">Presupuesto</a>
+          <a href="/transparencia?categoria=rendicion-de-cuentas">Rendición de cuentas</a>
+          <a href="/transparencia?categoria=actas">Actas</a>
+          <a href="/transparencia?categoria=licitaciones">Licitaciones</a>
+        </div>
+      </details>
+      <details class="nav-dropdown">
+        <summary>Municipalidad</summary>
+        <div>
+          <a href="/municipalidad">Historia y autoridades</a>
+          <a href="/municipalidad#alcaldes">Alcaldes y biografías</a>
+          <a href="/privacidad">Privacidad</a>
+        </div>
+      </details>
+    </nav>
+  </header>
+
+  <main>
+    
+<section class="civic-hero">
+  <div class="civic-hero-main">
+    <p class="eyebrow">Portal ciudadano</p>
+    <h1>Municipalidad de Marcala</h1>
+    <p>Portal ciudadano para trámites, actualidad, transparencia, servicios y memoria institucional de Marcala.</p>
+    <form class="hero-search civic-search" action="/buscar" method="get">
+      <label for="home-search">¿Qué estás buscando?</label>
+      <div>
+        <input id="home-search" type="search" name="q" placeholder="Buscar trámites, documentos, noticias o servicios" aria-label="Buscar">
+        <button type="submit">Buscar</button>
+      </div>
+    </form>
+  </div>
+  <div class="most-viewed">
+    <h2>Lo más consultado</h2>
+    <a href="/tramites">Trámites y requisitos</a>
+    <a href="/transparencia">Documentos públicos</a>
+    <a href="/actualidad?categoria=obras-y-proyectos">Obras y proyectos</a>
+    <a href="/municipalidad">Historia y autoridades</a>
+  </div>
+</section>
+
+<section class="section topic-section">
+  <div class="topic-grid">
+    <a href="/tramites">
+      <span>01</span>
+      <strong>Trámites y gestiones</strong>
+    </a>
+    <a href="/actualidad">
+      <span>02</span>
+      <strong>Actualidad municipal</strong>
+    </a>
+    <a href="/transparencia">
+      <span>03</span>
+      <strong>Transparencia</strong>
+    </a>
+    <a href="/agenda">
+      <span>04</span>
+      <strong>Agenda ciudadana</strong>
+    </a>
+    <a href="/municipalidad">
+      <span>05</span>
+      <strong>Municipalidad</strong>
+    </a>
+  </div>
+</section>
+
+<section class="section service-band">
+  <div class="section-head">
+    <p class="eyebrow">A un clic</p>
+    <h2>Servicios para la ciudadanía</h2>
+    <a href="/tramites">Ver todos</a>
+  </div>
+  <div class="service-grid">
+    
+    <a class="service-tile" href="/tramites/acceso-a-informacion-publica">
+      <span>Oficial de Información Pública</span>
+      <strong>Acceso a información pública</strong>
+      <p>Guía para solicitar información pública municipal.</p>
+    </a>
+    
+    <a class="service-tile" href="/tramites/atencion-en-unidad-tecnica-municipal">
+      <span>Unidad Técnica Municipal</span>
+      <strong>Atención en Unidad Técnica Municipal</strong>
+      <p>Orientación general para consultas relacionadas con obras, inspecciones o proyectos municipales.</p>
+    </a>
+    
+    <a class="service-tile" href="/tramites/consulta-y-pago-de-tasas-municipales">
+      <span>Tesorería Municipal</span>
+      <strong>Consulta y pago de tasas municipales</strong>
+      <p>Pasos generales para consultar y pagar tasas o servicios municipales.</p>
+    </a>
+    
+    <a class="service-tile" href="/tramites/pago-de-tasas-municipales">
+      <span>Tesorería Municipal</span>
+      <strong>Pago de tasas municipales</strong>
+      <p>Pasos para consultar y pagar tasas o servicios municipales.</p>
+    </a>
+    
+    <a class="service-tile" href="/tramites/solicitud-de-constancia-municipal">
+      <span>Secretaría Municipal</span>
+      <strong>Solicitud de constancia municipal</strong>
+      <p>Orientación para solicitar constancias emitidas por la Municipalidad.</p>
+    </a>
+    
+  </div>
+</section>
+
+<section class="section news-band">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">Es noticia</p>
+      <h2>Actualidad municipal</h2>
+    </div>
+    <a href="/actualidad">Todas las publicaciones</a>
+  </div>
+  <div class="card-grid">
+    
+    <article class="news-card">
+      <img src="/uploads/images/news-community.jpg" alt="Marcala, ciudad de amistad y aroma de café">
+      <div>
+        <span class="pill">Noticias</span>
+        <h3><a href="/actualidad/marcala-ciudad-de-amistad-y-aroma-de-cafe">Marcala, ciudad de amistad y aroma de café</a></h3>
+        <p>Marcala destaca por su identidad cafetalera, su tradición comunitaria y su papel como referente en la región de La Paz.</p>
+      </div>
+    </article>
+    
+    <article class="news-card">
+      <img src="/uploads/images/news-town-hall.jpg" alt="Datos generales del municipio de Marcala">
+      <div>
+        <span class="pill">Comunicados</span>
+        <h3><a href="/actualidad/datos-generales-del-municipio-de-marcala">Datos generales del municipio de Marcala</a></h3>
+        <p>Resumen de datos históricos, ubicación y actividad económica para pruebas de contenido institucional.</p>
+      </div>
+    </article>
+    
+    <article class="news-card">
+      <img src="/uploads/images/news-street-work.jpg" alt="Transparencia municipal y acceso a la información pública">
+      <div>
+        <span class="pill">Avisos</span>
+        <h3><a href="/actualidad/transparencia-municipal-y-acceso-a-la-informacion-publica">Transparencia municipal y acceso a la información pública</a></h3>
+        <p>El portal institucional debe facilitar el acceso a documentos, informes, presupuesto y rendición de cuentas.</p>
+      </div>
+    </article>
+    
+    <article class="news-card">
+      <img src="/uploads/images/news-street-work.jpg" alt="Obras y proyectos como categoría de actualidad">
+      <div>
+        <span class="pill">Obras y proyectos</span>
+        <h3><a href="/actualidad/obras-y-proyectos-como-categoria-de-actualidad">Obras y proyectos como categoría de actualidad</a></h3>
+        <p>La categoría permite publicar avances, inspecciones, informes y proyectos municipales sin crear un menú separado.</p>
+      </div>
+    </article>
+    
+    <article class="news-card">
+      <img src="/uploads/images/news-community.jpg" alt="Feria patronal de San Miguel">
+      <div>
+        <span class="pill">Campañas públicas</span>
+        <h3><a href="/actualidad/feria-patronal-de-san-miguel">Feria patronal de San Miguel</a></h3>
+        <p>Marcala celebra tradicionalmente su feria patronal en honor a San Miguel el 29 de septiembre.</p>
+      </div>
+    </article>
+    
+    <article class="news-card">
+      <img src="/uploads/images/news-town-hall.jpg" alt="Sesión informativa comunitaria">
+      <div>
+        <span class="pill">Comunicados</span>
+        <h3><a href="/actualidad/sesion-informativa-comunitaria">Sesión informativa comunitaria</a></h3>
+        <p>Actividad de agenda pública para informar a vecinos sobre servicios municipales.</p>
+      </div>
+    </article>
+    
+  </div>
+</section>
+
+<section class="section two-column civic-lower">
+  <div>
+    <p class="eyebrow">Transparencia</p>
+    <h2>Documentos recientes</h2>
+    <div class="document-list">
+      
+      <a href="/transparencia" class="document-row">
+        <span>Informes</span>
+        <strong>Ejemplo de documento de transparencia</strong>
+        <small>15/01/2026</small>
+      </a>
+      
+      <a href="/transparencia" class="document-row">
+        <span>Otros</span>
+        <strong>Portal Único de Transparencia de Marcala</strong>
+        <small>03/11/2025</small>
+      </a>
+      
+      <a href="/transparencia" class="document-row">
+        <span>Informes</span>
+        <strong>Ficha de población y vivienda de Marcala</strong>
+        <small>01/02/2025</small>
+      </a>
+      
+      <a href="/transparencia" class="document-row">
+        <span>Informes</span>
+        <strong>Perfil Municipal de Marcala</strong>
+        <small>01/03/2022</small>
+      </a>
+      
+    </div>
+  </div>
+  <div class="mayor-panel">
+    <p class="eyebrow">Municipalidad</p>
+    
+    <img src="/uploads/images/mayor-placeholder.jpg" alt="Ana Lucía Castro López">
+    <h2>Ana Lucía Castro López</h2>
+    <p>Alcaldesa Municipal de Marcala. El Portal Único de Transparencia identifica a Ana Lucía Castro López como autoridad municipal y documentos públicos de la municipalidad la registran dentro de la corporación municipal 2022-2026.
+
+Esta biografía es un texto de prueba, pendiente de fotografía oficial y validación por el equipo municipal.</p>
+    
+    <a class="button" href="/municipalidad">Historia y autoridades</a>
+  </div>
+</section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      <strong>Municipalidad de Marcala</strong>
+      <p>Marcala, La Paz, Honduras.</p>
+    </div>
+    <div class="footer-links">
+      <a href="/privacidad">Privacidad</a>
+      <a href="/transparencia">Transparencia</a>
+      <a href="/tramites">Trámites</a>
+    </div>
+    <div class="footer-tags">
+      
+      <a href="/buscar?tag=transparencia">#transparencia</a>
+      
+      <a href="/buscar?tag=comunidad">#comunidad</a>
+      
+      <a href="/buscar?tag=obras">#obras</a>
+      
+      <a href="/buscar?tag=municipio">#municipio</a>
+      
+      <a href="/buscar?tag=pagos">#pagos</a>
+      
+    </div>
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Trámites | {{ site_name }}{% endblock %}
+{% block content %}
+<section class="page-hero compact">
+  <p class="eyebrow">Trámites</p>
+  <h1>Requisitos y pasos</h1>
+  <p>Información detallada para realizar gestiones municipales.</p>
+</section>
+<section class="section service-grid">
+  {% for item in items %}
+  <a class="service-tile" href="/tramites/{{ item.slug }}">
+    <span>{{ item.department }}</span>
+    <strong>{{ item.title }}</strong>
+    <p>{{ item.summary }}</p>
+  </a>
+  {% endfor %}
+</section>
+{% endblock %}

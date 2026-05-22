@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ item.title }} | {{ site_name }}{% endblock %}
+{% block content %}
+<article class="article">
+  <header>
+    <span class="pill">{{ item.department }}</span>
+    <h1>{{ item.title }}</h1>
+    <p>{{ item.summary }}</p>
+  </header>
+  <div class="detail-grid">
+    <section>
+      <h2>Requisitos</h2>
+      <ul>{% for line in item.requirements.split('\n') if line.strip() %}<li>{{ line }}</li>{% endfor %}</ul>
+    </section>
+    <section>
+      <h2>Pasos</h2>
+      <ol>{% for line in item.steps.split('\n') if line.strip() %}<li>{{ line }}</li>{% endfor %}</ol>
+    </section>
+  </div>
+  <div class="info-strip">
+    <span><strong>Costo:</strong> {{ item.cost or "Consultar" }}</span>
+    <span><strong>Tiempo:</strong> {{ item.estimated_time or "Consultar" }}</span>
+    <span><strong>Horario:</strong> {{ item.schedule or "Consultar" }}</span>
+    <span><strong>Ubicación:</strong> {{ item.location or "Municipalidad" }}</span>
+  </div>
+  {% if item.document_url %}<a class="button" href="{{ item.document_url }}" target="_blank" rel="noopener">Ver documento relacionado</a>{% endif %}
+</article>
+{% endblock %}

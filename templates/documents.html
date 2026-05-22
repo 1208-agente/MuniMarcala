@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Transparencia | {{ site_name }}{% endblock %}
+{% block content %}
+<section class="page-hero compact">
+  <p class="eyebrow">Transparencia</p>
+  <h1>Documentos públicos</h1>
+  <p>Presupuestos, actas, informes, licitaciones y documentos municipales.</p>
+</section>
+<section class="section">
+  <nav class="filters">
+    <a class="{{ 'active' if selected_category == 'todos' else '' }}" href="/transparencia">Todo</a>
+    {% for value, label in document_categories %}
+    <a class="{{ 'active' if selected_category == value else '' }}" href="/transparencia?categoria={{ value }}">{{ label }}</a>
+    {% endfor %}
+  </nav>
+  <div class="document-list">
+    {% for item in items %}
+    <article class="document-row">
+      <span>{{ item.category|category_label }} · {{ item.year or "" }}</span>
+      <strong>{{ item.title }}</strong>
+      <p>{{ item.description }}</p>
+      <div class="row-actions">
+        {% if item.file_path %}<a class="button small" href="{{ asset_url(item.file_path) }}" target="_blank" rel="noopener">Abrir PDF</a>{% endif %}
+        {% if item.external_url %}<a class="button ghost small" href="{{ item.external_url }}" target="_blank" rel="noopener">Enlace oficial</a>{% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

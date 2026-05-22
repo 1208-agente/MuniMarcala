@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="civic-hero">
+  <div class="civic-hero-main">
+    <p class="eyebrow">Portal ciudadano</p>
+    <h1>{{ site_name }}</h1>
+    <p>{{ hero_summary }}</p>
+    <form class="hero-search civic-search" action="/buscar" method="get">
+      <label for="home-search">¿Qué estás buscando?</label>
+      <div>
+        <input id="home-search" type="search" name="q" placeholder="Buscar trámites, documentos, noticias o servicios" aria-label="Buscar">
+        <button type="submit">Buscar</button>
+      </div>
+    </form>
+  </div>
+  <div class="most-viewed">
+    <h2>Lo más consultado</h2>
+    <a href="/tramites">Trámites y requisitos</a>
+    <a href="/transparencia">Documentos públicos</a>
+    <a href="/actualidad?categoria=obras-y-proyectos">Obras y proyectos</a>
+    <a href="/municipalidad">Historia y autoridades</a>
+  </div>
+</section>
+
+<section class="section topic-section">
+  <div class="topic-grid">
+    <a href="/tramites">
+      <span>01</span>
+      <strong>Trámites y gestiones</strong>
+    </a>
+    <a href="/actualidad">
+      <span>02</span>
+      <strong>Actualidad municipal</strong>
+    </a>
+    <a href="/transparencia">
+      <span>03</span>
+      <strong>Transparencia</strong>
+    </a>
+    <a href="/agenda">
+      <span>04</span>
+      <strong>Agenda ciudadana</strong>
+    </a>
+    <a href="/municipalidad">
+      <span>05</span>
+      <strong>Municipalidad</strong>
+    </a>
+  </div>
+</section>
+
+<section class="section service-band">
+  <div class="section-head">
+    <p class="eyebrow">A un clic</p>
+    <h2>Servicios para la ciudadanía</h2>
+    <a href="/tramites">Ver todos</a>
+  </div>
+  <div class="service-grid">
+    {% for item in services %}
+    <a class="service-tile" href="/tramites/{{ item.slug }}">
+      <span>{{ item.department or "Municipalidad" }}</span>
+      <strong>{{ item.title }}</strong>
+      <p>{{ item.summary }}</p>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section news-band">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">Es noticia</p>
+      <h2>Actualidad municipal</h2>
+    </div>
+    <a href="/actualidad">Todas las publicaciones</a>
+  </div>
+  <div class="card-grid">
+    {% for item in featured %}
+    <article class="news-card">
+      {% if item.image_path %}<img src="{{ asset_url(item.image_path) }}" alt="{{ item.image_alt or item.title }}">{% endif %}
+      <div>
+        <span class="pill">{{ item.category|category_label }}</span>
+        <h3><a href="/actualidad/{{ item.slug }}">{{ item.title }}</a></h3>
+        <p>{{ item.summary }}</p>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section two-column civic-lower">
+  <div>
+    <p class="eyebrow">Transparencia</p>
+    <h2>Documentos recientes</h2>
+    <div class="document-list">
+      {% for doc in docs %}
+      <a href="/transparencia" class="document-row">
+        <span>{{ doc.category|category_label }}</span>
+        <strong>{{ doc.title }}</strong>
+        <small>{{ doc.document_date|date_label }}</small>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="mayor-panel">
+    <p class="eyebrow">Municipalidad</p>
+    {% if current_mayor %}
+    {% if current_mayor.photo_path %}<img src="{{ asset_url(current_mayor.photo_path) }}" alt="{{ current_mayor.name }}">{% endif %}
+    <h2>{{ current_mayor.name }}</h2>
+    <p>{{ current_mayor.biography }}</p>
+    {% endif %}
+    <a class="button" href="/municipalidad">Historia y autoridades</a>
+  </div>
+</section>
+{% endblock %}
