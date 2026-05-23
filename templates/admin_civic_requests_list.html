@@ -1,0 +1,44 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<header class="admin-feed-hero compact">
+  <div>
+    <p class="eyebrow">Participación ciudadana</p>
+    <h1>Denuncias, sugerencias y peticiones</h1>
+    <p>Bandeja interna. Estos registros no se publican y no se eliminan desde el panel.</p>
+  </div>
+</header>
+<form class="filters admin-filter-form" method="get">
+  <select name="estado">
+    <option value="todos" {{ 'selected' if selected_status == 'todos' else '' }}>Todos los estados</option>
+    {% for value, label in civic_request_statuses %}
+    <option value="{{ value }}" {{ 'selected' if selected_status == value else '' }}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <select name="tipo">
+    <option value="todos" {{ 'selected' if selected_type == 'todos' else '' }}>Todos los tipos</option>
+    {% for value, label in civic_request_types %}
+    <option value="{{ value }}" {{ 'selected' if selected_type == value else '' }}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <button class="admin-button secondary" type="submit">Filtrar</button>
+</form>
+<div class="admin-table-wrap">
+  <table class="admin-table">
+    <thead><tr><th>Folio</th><th>Tipo</th><th>Asunto</th><th>Estado</th><th>Fecha</th><th></th></tr></thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td>{{ item.folio }}</td>
+        <td>{{ item.request_type }}</td>
+        <td>{{ item.subject }}</td>
+        <td>{{ item.request_status }}</td>
+        <td>{{ item.created_at|date_label }}</td>
+        <td><a href="/admin/participacion/{{ item.id }}">Revisar</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6">No hay solicitudes con esos filtros.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,9 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="civic-hero">
+<section class="civic-hero" data-hero-rotator>
+  <div class="hero-media" aria-hidden="true">
+    {% for image in hero_images %}
+    <div class="hero-slide {{ 'active' if loop.first else '' }}" style="background-image: url('{{ asset_url(image) }}')"></div>
+    {% endfor %}
+  </div>
   <div class="civic-hero-main">
-    <p class="eyebrow">Portal ciudadano</p>
-    <h1>{{ site_name }}</h1>
+    <p class="eyebrow">{{ site_name }}</p>
+    <h1>{{ hero_title }}</h1>
     <p>{{ hero_summary }}</p>
     <form class="hero-search civic-search" action="/buscar" method="get">
       <label for="home-search">¿Qué estás buscando?</label>
@@ -19,6 +24,7 @@
     <a href="/transparencia">Documentos públicos</a>
     <a href="/actualidad?categoria=obras-y-proyectos">Obras y proyectos</a>
     <a href="/municipalidad">Historia y autoridades</a>
+    <a href="/participacion">Denuncias y peticiones</a>
   </div>
 </section>
 
@@ -43,6 +49,10 @@
     <a href="/municipalidad">
       <span>05</span>
       <strong>Municipalidad</strong>
+    </a>
+    <a href="/participacion">
+      <span>06</span>
+      <strong>Participación ciudadana</strong>
     </a>
   </div>
 </section>

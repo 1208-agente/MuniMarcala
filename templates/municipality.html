@@ -6,26 +6,40 @@
   <h1>{{ history_title }}</h1>
   <p>{{ history_body }}</p>
 </section>
-<section class="section" id="alcaldes">
+<section class="section" id="autoridades">
   <div class="section-head">
     <div>
       <p class="eyebrow">Autoridades</p>
-      <h2>Alcaldes y biografías</h2>
+      <h2>Corporación municipal</h2>
+    </div>
+    <a class="admin-button secondary" href="/contactos">Ver contactos municipales</a>
+  </div>
+  <div class="people-grid">
+    {% for item in authorities %}
+    <a class="person-card" href="/municipalidad/autoridades/{{ item.slug }}">
+      {% if item.photo_path %}<img src="{{ asset_url(item.photo_path) }}" alt="{{ item.name }}">{% endif %}
+      <span>{{ item.position }}</span>
+      <h3>{{ item.name }}</h3>
+      <p>{{ item.area }}</p>
+      <small>{{ item.period }}</small>
+    </a>
+    {% else %}
+    <p>No hay miembros de corporación municipal publicados.</p>
+    {% endfor %}
+  </div>
+</section>
+<section class="section split-band" id="alcaldes">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">Historia</p>
+      <h2>Historial de alcaldes</h2>
     </div>
   </div>
   <div class="people-grid">
-    {% if current_mayor %}
-    <a class="person-card current" href="/municipalidad/alcaldes/{{ current_mayor.slug }}">
-      {% if current_mayor.photo_path %}<img src="{{ asset_url(current_mayor.photo_path) }}" alt="{{ current_mayor.name }}">{% endif %}
-      <span class="pill">Actual</span>
-      <h3>{{ current_mayor.name }}</h3>
-      <p>{{ current_mayor.biography }}</p>
-    </a>
-    {% endif %}
     {% for mayor in former_mayors %}
-    <a class="person-card" href="/municipalidad/alcaldes/{{ mayor.slug }}">
+    <a class="person-card {{ 'current' if mayor.is_current else '' }}" href="/municipalidad/alcaldes/{{ mayor.slug }}">
       {% if mayor.photo_path %}<img src="{{ asset_url(mayor.photo_path) }}" alt="{{ mayor.name }}">{% endif %}
-      <span>{{ mayor.period_start }}{% if mayor.period_end %} - {{ mayor.period_end }}{% endif %}</span>
+      <span>{{ "Actual" if mayor.is_current else mayor.period_start }}{% if mayor.period_end %} - {{ mayor.period_end }}{% endif %}</span>
       <h3>{{ mayor.name }}</h3>
       <p>{{ mayor.biography }}</p>
     </a>

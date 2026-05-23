@@ -4,19 +4,22 @@ Primera versión Flask del sitio institucional de la Municipalidad de Marcala.
 
 ## Incluye
 
-- Sitio público con portada, trámites, actualidad, transparencia, agenda, historia y alcaldes.
+- Sitio público con portada, trámites, actualidad, transparencia, agenda, historia, corporación municipal, alcaldes y contactos.
 - Búsqueda global sin distinguir mayúsculas, minúsculas o tildes.
 - Panel interno con login por correo y contraseña.
 - Roles: administrador y editor.
 - Registro de auditoría para crear, editar, entrar y salir.
-- Carga de imágenes para portada, publicaciones y biografías.
+- Carga de imágenes para portada, publicaciones, biografías y contactos.
+- Adjuntos descargables para artículos: PDF, DOCX o imágenes de respaldo.
 - Carga de documentos PDF para transparencia.
+- Directorio de contactos editable e importable desde CSV, XLS o XLSX.
+- Sección pública de denuncias, sugerencias y peticiones con folio, adjuntos y bandeja interna de seguimiento.
 - Base de datos SQLite local.
 
 ## Ejecutar localmente
 
 ```powershell
-cd D:\municipalidad_marcala_repo
+cd D:\MuniMarcala
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
@@ -46,4 +49,7 @@ $env:SESSION_COOKIE_SECURE="1"
 - Crear el administrador municipal definitivo.
 - Completar historia oficial, biografías y trámites reales.
 - Cargar documentos PDF reales de transparencia.
-- Migrar almacenamiento a S3/Supabase Storage cuando se publique en la web.
+- Cargar contactos oficiales desde Excel o CSV.
+- Cargar miembros reales de la corporación municipal.
+- Activar CAPTCHA/Turnstile antes de abrir la sección de participación en internet.
+- Publicar la versión editable con GitHub, Supabase PostgreSQL/Auth/Storage y un host Python detrás de Cloudflare.

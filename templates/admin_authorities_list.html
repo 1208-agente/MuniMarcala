@@ -1,0 +1,28 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<header class="admin-feed-hero compact">
+  <div>
+    <p class="eyebrow">Municipalidad</p>
+    <h1>Corporación municipal</h1>
+    <p>Miembros actuales de la corporación municipal, cargos y reseñas públicas.</p>
+  </div>
+  <a class="button" href="/admin/autoridades/nuevo">Nueva autoridad</a>
+</header>
+<div class="admin-table-wrap">
+  <table class="admin-table">
+    <thead><tr><th>Nombre</th><th>Cargo</th><th>Área</th><th>Periodo</th><th>Estado</th><th></th></tr></thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td>{{ item.name }}</td>
+        <td>{{ item.position }}</td>
+        <td>{{ item.area }}</td>
+        <td>{{ item.period }}</td>
+        <td>{{ item.status|status_label }}</td>
+        <td><a href="/admin/autoridades/{{ item.id }}">Editar</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

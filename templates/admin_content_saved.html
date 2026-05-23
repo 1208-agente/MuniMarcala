@@ -42,6 +42,20 @@
   <img class="review-image" src="{{ asset_url(item.image_path) }}" alt="{{ item.image_alt or item.title }}">
   {% endif %}
   <div class="review-body rich-text">{{ item.body|replace('\n', '<br>')|safe }}</div>
+  {% if attachments %}
+  <div class="download-panel">
+    <h2>Archivos de respaldo</h2>
+    <div class="document-list">
+      {% for attachment in attachments %}
+      <a class="document-row" href="{{ asset_url(attachment.file_path) }}" target="_blank" rel="noopener">
+        <span>{{ attachment.file_type|upper }}</span>
+        <strong>{{ attachment.title or attachment.file_path }}</strong>
+        <p>Archivo descargable asociado a esta publicación.</p>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
   {% if item.cta_url %}
   <div class="saved-actions">
     <a class="button" href="{{ item.cta_url }}" target="_blank" rel="noopener">{{ item.cta_label or "Más información" }}</a>

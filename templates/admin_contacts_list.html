@@ -1,0 +1,31 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<header class="admin-feed-hero compact">
+  <div>
+    <p class="eyebrow">Directorio</p>
+    <h1>Contactos municipales</h1>
+    <p>Autoridades, empleados, áreas de atención y oficinas.</p>
+  </div>
+  <div class="admin-form-actions">
+    <a class="button" href="/admin/contactos/nuevo">Nuevo contacto</a>
+    <a class="admin-button secondary" href="/admin/contactos/importar">Importar Excel/CSV</a>
+  </div>
+</header>
+<div class="admin-table-wrap">
+  <table class="admin-table">
+    <thead><tr><th>Nombre</th><th>Área</th><th>Cargo</th><th>Teléfono</th><th>Estado</th><th></th></tr></thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td>{{ item.name }}</td>
+        <td>{{ item.area }}</td>
+        <td>{{ item.position }}</td>
+        <td>{{ item.phone }}</td>
+        <td>{{ item.status|status_label }}</td>
+        <td><a href="/admin/contactos/{{ item.id }}">Editar</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -44,6 +44,29 @@
     <label>Texto alternativo<input name="image_alt" value="{{ item.image_alt if item else '' }}"></label>
     <label>Etiquetas <small>Máximo 4, separadas por coma.</small><input name="tags" value="{{ item.tags if item else '' }}"></label>
   </div>
+  <section class="form-panel">
+    <h2>Archivos de respaldo</h2>
+    <p>PDF, DOCX o imágenes que quedarán como enlaces descargables en la publicación.</p>
+    {% if attachments %}
+    <div class="attachment-list compact">
+      {% for attachment in attachments %}
+      <label class="attachment-check">
+        <input type="checkbox" name="remove_attachment" value="{{ attachment.id }}">
+        <span>Quitar {{ attachment.title or attachment.file_path }}</span>
+        <a href="{{ asset_url(attachment.file_path) }}" target="_blank" rel="noopener">Ver</a>
+      </label>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <div class="form-grid">
+      <label>Título del archivo 1<input name="attachment_titles" placeholder="Ej. Informe técnico"></label>
+      <label>Archivo 1<input type="file" name="attachment_files" accept=".pdf,.docx,.jpg,.jpeg,.png,.webp"></label>
+      <label>Título del archivo 2<input name="attachment_titles" placeholder="Ej. Imagen de respaldo"></label>
+      <label>Archivo 2<input type="file" name="attachment_files" accept=".pdf,.docx,.jpg,.jpeg,.png,.webp"></label>
+      <label>Título del archivo 3<input name="attachment_titles"></label>
+      <label>Archivo 3<input type="file" name="attachment_files" accept=".pdf,.docx,.jpg,.jpeg,.png,.webp"></label>
+    </div>
+  </section>
   <div class="admin-form-actions">
     <button class="button" type="submit" name="action" value="save_review">Guardar y revisar</button>
     <button class="button ghost" type="submit" name="action" value="save_continue">Guardar y seguir editando</button>

@@ -10,6 +10,20 @@
   </header>
   {% if item.image_path %}<img class="article-image" src="{{ asset_url(item.image_path) }}" alt="{{ item.image_alt or item.title }}">{% endif %}
   <div class="rich-text">{{ item.body|replace('\n', '<br>')|safe }}</div>
+  {% if attachments %}
+  <section class="download-panel">
+    <h2>Archivos de respaldo</h2>
+    <div class="document-list">
+      {% for attachment in attachments %}
+      <a class="document-row" href="{{ asset_url(attachment.file_path) }}" target="_blank" rel="noopener" download>
+        <span>{{ attachment.file_type|upper }}</span>
+        <strong>{{ attachment.title or attachment.file_path }}</strong>
+        <p>Descargar archivo relacionado con esta publicación.</p>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
   {% if item.cta_url %}
   <a class="button" href="{{ item.cta_url }}" target="_blank" rel="noopener">{{ item.cta_label or "Más información" }}</a>
   {% endif %}

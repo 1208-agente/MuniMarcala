@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Denuncias, sugerencias y peticiones | {{ site_name }}{% endblock %}
+{% block content %}
+<section class="page-hero compact">
+  <p class="eyebrow">Participación ciudadana</p>
+  <h1>Denuncias, sugerencias y peticiones</h1>
+  <p>Envía información a la municipalidad. Puedes hacerlo de forma anónima o dejar datos de contacto si necesitas respuesta.</p>
+</section>
+<section class="section">
+  <form class="public-form" method="post" enctype="multipart/form-data">
+    <div class="form-grid">
+      <label>Tipo
+        <select name="request_type">
+          {% for value, label in civic_request_types %}
+          <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Asunto<input name="subject" required maxlength="160"></label>
+    </div>
+    <label>Descripción<textarea name="body" rows="8" required placeholder="Describe el caso, ubicación, fecha aproximada o detalle relevante."></textarea></label>
+    <section class="form-panel">
+      <h2>Datos para respuesta</h2>
+      <label class="check"><input type="checkbox" name="wants_response"> Deseo recibir respuesta de la municipalidad</label>
+      <div class="form-grid">
+        <label>Nombre<input name="requester_name"></label>
+        <label>Teléfono<input name="requester_phone"></label>
+        <label>Correo<input type="email" name="requester_email"></label>
+      </div>
+      <p class="session-note">Si no marcas la casilla, estos datos no son necesarios y la solicitud quedará anónima.</p>
+    </section>
+    <section class="form-panel">
+      <h2>Archivos de respaldo</h2>
+      <p>Puedes adjuntar PDF, DOCX o imágenes. No subas información privada de terceros si no es necesaria para explicar el caso.</p>
+      <div class="form-grid">
+        <label>Archivo 1<input type="file" name="attachment_files" accept=".pdf,.docx,.jpg,.jpeg,.png,.webp"></label>
+        <label>Archivo 2<input type="file" name="attachment_files" accept=".pdf,.docx,.jpg,.jpeg,.png,.webp"></label>
+        <label>Archivo 3<input type="file" name="attachment_files" accept=".pdf,.docx,.jpg,.jpeg,.png,.webp"></label>
+      </div>
+    </section>
+    <p class="session-note">La información enviada no se publica en la página. Solo podrá verla el personal autorizado desde el panel interno.</p>
+    <div class="admin-form-actions">
+      <button class="button" type="submit">Enviar solicitud</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

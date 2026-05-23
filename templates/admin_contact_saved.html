@@ -1,0 +1,31 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<section class="admin-feed-hero compact">
+  <div>
+    <p class="eyebrow">Guardado y revisión</p>
+    <h1>{{ item.name }}</h1>
+    <p>Vista temporal del panel para revisar cómo quedó la ficha de contacto.</p>
+  </div>
+</section>
+<section class="admin-feed-card content-review-card">
+  <div class="admin-feed-card-head">
+    <div>
+      <span>{{ item.area }} · {{ item.status|status_label }}</span>
+      <h2>{{ item.name }}</h2>
+      <p>{{ item.position }}</p>
+      <small>{{ item.office }}</small>
+    </div>
+  </div>
+  {% if item.photo_path %}<img class="review-image portrait-image" src="{{ asset_url(item.photo_path) }}" alt="{{ item.name }}">{% endif %}
+  <div class="info-grid">
+    {% if item.phone %}<span><strong>Teléfono:</strong> {{ item.phone }}</span>{% endif %}
+    {% if item.email %}<span><strong>Correo:</strong> {{ item.email }}</span>{% endif %}
+  </div>
+  {% if item.bio %}<div class="review-body rich-text">{{ item.bio|replace('\n', '<br>')|safe }}</div>{% endif %}
+  <div class="admin-form-actions saved-actions">
+    <a class="button" href="/admin/contactos/{{ item.id }}">Volver a editar</a>
+    {% if public_url %}<a class="admin-button secondary" href="{{ public_url }}" target="_blank" rel="noopener">Abrir ficha pública</a>{% endif %}
+    <a class="admin-button secondary" href="/admin/contactos">Volver a contactos</a>
+  </div>
+</section>
+{% endblock %}

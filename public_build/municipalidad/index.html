@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Sitio oficial de la Municipalidad de Marcala con trámites, actualidad, transparencia y servicios.">
   <title>Municipalidad | Municipalidad de Marcala</title>
-  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="stylesheet" href="/static/css/styles.css?v=20260523-nav3">
 </head>
 <body>
   <div class="top-strip">
@@ -20,14 +20,35 @@
         <small>Marcala, La Paz</small>
       </span>
     </a>
-    <button class="nav-toggle" type="button" aria-label="Abrir menú" aria-expanded="false" data-nav-toggle>
+    <button class="nav-toggle" type="button" aria-label="Abrir menú" aria-controls="site-menu" aria-expanded="false" data-nav-toggle>
       <span></span><span></span><span></span>
     </button>
     <form class="header-search" action="/buscar" method="get" role="search">
       <input type="search" name="q" placeholder="Buscar" aria-label="Buscar en el sitio">
       <button type="submit">Buscar</button>
     </form>
-    <nav class="main-nav" data-nav>
+    <nav class="main-nav" id="site-menu" aria-label="Navegación principal" aria-modal="true" data-nav>
+      <div class="mobile-nav-head">
+        <strong>Menú</strong>
+        <button type="button" aria-label="Cerrar menú" data-nav-close>×</button>
+      </div>
+      <form class="mobile-nav-search" action="/buscar" method="get" role="search">
+        <input type="search" name="q" placeholder="Buscar en el sitio" aria-label="Buscar en el sitio">
+        <button type="submit">Buscar</button>
+      </form>
+      <div class="mobile-link-list">
+        <a href="/">Inicio</a>
+        <a href="/tramites">Trámites</a>
+        <a href="/actualidad">Actualidad municipal</a>
+        <a href="/agenda">Agenda municipal</a>
+        <a href="/transparencia">Transparencia</a>
+        <a href="/municipalidad">Historia y autoridades</a>
+        <a href="/municipalidad#autoridades">Corporación municipal</a>
+        <a href="/municipalidad#alcaldes">Historial de alcaldes</a>
+        <a href="/contactos">Contactos municipales</a>
+        <a href="/participacion">Denuncias y peticiones</a>
+        <a href="/privacidad">Privacidad</a>
+      </div>
       <a href="/">Inicio</a>
       <a href="/tramites">Trámites</a>
       <details class="nav-dropdown">
@@ -55,12 +76,16 @@
         <summary>Municipalidad</summary>
         <div>
           <a href="/municipalidad">Historia y autoridades</a>
-          <a href="/municipalidad#alcaldes">Alcaldes y biografías</a>
+          <a href="/municipalidad#autoridades">Corporación municipal</a>
+          <a href="/municipalidad#alcaldes">Historial de alcaldes</a>
+          <a href="/contactos">Contactos municipales</a>
+          <a href="/participacion">Denuncias y peticiones</a>
           <a href="/privacidad">Privacidad</a>
         </div>
       </details>
     </nav>
   </header>
+  <div class="nav-scrim" data-nav-scrim></div>
 
   <main>
     
@@ -69,17 +94,36 @@
   <h1>Historia de Marcala</h1>
   <p>Marcala es un municipio del departamento de La Paz reconocido por su actividad cafetalera, su vida comunitaria y su entorno de montaña. Esta sección está preparada para que el equipo municipal publique una reseña histórica oficial, hitos relevantes, fotografías y referencias documentales.</p>
 </section>
-<section class="section" id="alcaldes">
+<section class="section" id="autoridades">
   <div class="section-head">
     <div>
       <p class="eyebrow">Autoridades</p>
-      <h2>Alcaldes y biografías</h2>
+      <h2>Corporación municipal</h2>
+    </div>
+    <a class="admin-button secondary" href="/contactos">Ver contactos municipales</a>
+  </div>
+  <div class="people-grid">
+    
+    <a class="person-card" href="/municipalidad/autoridades/miembro-corporacion-municipal">
+      
+      <span>Regiduría municipal</span>
+      <h3>Miembro de la corporación municipal</h3>
+      <p>Corporación Municipal</p>
+      <small>2026-2030</small>
+    </a>
+    
+  </div>
+</section>
+<section class="section split-band" id="alcaldes">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">Historia</p>
+      <h2>Historial de alcaldes</h2>
     </div>
   </div>
   <div class="people-grid">
     
-    
-    <a class="person-card" href="/municipalidad/alcaldes/autoridad-municipal-actual">
+    <a class="person-card " href="/municipalidad/alcaldes/autoridad-municipal-actual">
       <img src="/uploads/images/20260522154017-WhatsApp_Image_2026-05-22_at_9.32.07_AM.jpeg" alt="Carmen Georgina Bautista Claros">
       <span>2026</span>
       <h3>Carmen Georgina Bautista Claros</h3>
@@ -98,17 +142,25 @@ Desde el inicio de su mandato en 2026, su plan de gobierno se ha centrado en din
 Como una de las pocas mujeres al frente de una alcaldía en el departamento de La Paz en el ciclo actual, Carmen Bautista es una figura clave en la política local, enfocada en transformar a Marcala en un municipio más próspero y conectado.</p>
     </a>
     
-    <a class="person-card" href="/municipalidad/alcaldes/www-google-com">
+    <a class="person-card " href="/municipalidad/alcaldes/www-google-com">
       <img src="/uploads/images/20260522151216-apps.37393.13876487648548738.cbdadb4c-8335-4699-876e-68e010df4b84.jpeg" alt="yo no sé">
       <span>2000 - 2004</span>
       <h3>yo no sé</h3>
-      <p>asdasd  asdasdasd</p>
+      <p>asdasd  asdasdhfdhasd fdfgd dfhdfhdfh</p>
     </a>
     
   </div>
 </section>
 
   </main>
+
+  <nav class="mobile-bottom-nav" aria-label="Accesos rápidos">
+    <a href="/"><span>Inicio</span></a>
+    <a href="/tramites"><span>Trámites</span></a>
+    <a href="/buscar"><span>Buscar</span></a>
+    <a href="/participacion"><span>Participar</span></a>
+    <button type="button" data-nav-toggle-bottom aria-label="Abrir menú completo"><span>Menú</span></button>
+  </nav>
 
   <footer class="site-footer">
     <div>
@@ -119,22 +171,24 @@ Como una de las pocas mujeres al frente de una alcaldía en el departamento de L
       <a href="/privacidad">Privacidad</a>
       <a href="/transparencia">Transparencia</a>
       <a href="/tramites">Trámites</a>
+      <a href="/contactos">Contactos</a>
+      <a href="/participacion">Participación</a>
     </div>
     <div class="footer-tags">
       
       <a href="/buscar?tag=comunidad">#comunidad</a>
       
+      <a href="/buscar?tag=municipalidad">#municipalidad</a>
+      
       <a href="/buscar?tag=agenda">#agenda</a>
       
       <a href="/buscar?tag=ambiente">#ambiente</a>
       
-      <a href="/buscar?tag=barrios">#barrios</a>
-      
-      <a href="/buscar?tag=constancias">#constancias</a>
+      <a href="/buscar?tag=atencion">#atencion</a>
       
     </div>
   </footer>
 
-  <script src="/static/js/app.js"></script>
+  <script src="/static/js/app.js?v=20260523-nav3"></script>
 </body>
 </html>

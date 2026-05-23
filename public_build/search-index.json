@@ -58,9 +58,25 @@
   {
     "type": "Municipalidad",
     "title": "yo no sé",
-    "summary": "asdasd  asdasdasd",
+    "summary": "asdasd  asdasdhfdhasd fdfgd dfhdfhdfh",
     "body": "2000",
     "tags": "",
     "url": "/municipalidad/alcaldes/www-google-com"
+  },
+  {
+    "type": "Autoridad municipal",
+    "title": "Miembro de la corporación municipal",
+    "summary": "Ficha editable para cargar los miembros actuales de la corporación municipal con fotografía, cargo, contacto y reseña pública.",
+    "body": "Regiduría municipal",
+    "tags": "corporacion, municipalidad",
+    "url": "/municipalidad/autoridades/miembro-corporacion-municipal"
+  },
+  {
+    "type": "Contacto",
+    "title": "Atención ciudadana",
+    "summary": "Ventanilla de información",
+    "body": "Secretaría Municipal",
+    "tags": "contacto, atencion",
+    "url": "/contactos/atencion-ciudadana"
   }
 ]

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Contactos | {{ site_name }}{% endblock %}
+{% block content %}
+<section class="page-hero compact">
+  <p class="eyebrow">Directorio municipal</p>
+  <h1>Contactos</h1>
+  <p>Autoridades, oficinas y personal de atención publicados por la Municipalidad de Marcala.</p>
+</section>
+<section class="section">
+  <div class="filter-row">
+    <a class="{{ 'active' if selected_area == 'todos' else '' }}" href="/contactos">Todas las áreas</a>
+    {% for area in areas %}
+    <a class="{{ 'active' if selected_area == area.area else '' }}" href="/contactos?area={{ area.area|urlencode }}">{{ area.area }}</a>
+    {% endfor %}
+  </div>
+  <div class="people-grid">
+    {% for item in items %}
+    <a class="person-card contact-card" href="/contactos/{{ item.slug }}">
+      {% if item.photo_path %}<img src="{{ asset_url(item.photo_path) }}" alt="{{ item.name }}">{% endif %}
+      <span>{{ item.area }}</span>
+      <h3>{{ item.name }}</h3>
+      <p>{{ item.position }}</p>
+      <small>{{ item.office }}</small>
+    </a>
+    {% else %}
+    <p>No hay contactos publicados en esta área.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

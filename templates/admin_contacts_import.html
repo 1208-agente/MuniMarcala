@@ -1,0 +1,24 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<header class="admin-feed-hero compact">
+  <div>
+    <p class="eyebrow">Importar</p>
+    <h1>Cargar contactos desde Excel o CSV</h1>
+    <p>Usa columnas: nombre, area, cargo, cel, correo, oficina, foto, biografia, estado, etiquetas, orden.</p>
+  </div>
+  <a class="admin-button secondary" href="/admin/contactos">Volver</a>
+</header>
+<form class="admin-form" method="post" enctype="multipart/form-data">
+  <label>Archivo CSV, XLS o XLSX
+    <input type="file" name="contacts_file" accept=".csv,.xls,.xlsx" required>
+  </label>
+  <section class="form-panel">
+    <h2>Notas</h2>
+    <p>Si existe un contacto con el mismo enlace interno o correo, se actualizará. Si no existe, se creará publicado por defecto.</p>
+    <p>La columna foto puede contener una URL pública o una ruta ya cargada en el sistema, por ejemplo images/foto.jpg.</p>
+  </section>
+  <div class="admin-form-actions">
+    <button class="button" type="submit">Importar contactos</button>
+  </div>
+</form>
+{% endblock %}

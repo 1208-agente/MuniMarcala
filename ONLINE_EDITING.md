@@ -4,8 +4,8 @@ Esta configuración convierte el sitio municipal en una aplicación editable en 
 
 - Flask sirve el sitio público y el panel admin.
 - Supabase Auth valida correos y contraseñas del panel.
-- Supabase PostgreSQL guarda perfiles internos, roles, publicaciones, trámites, documentos, alcaldes y auditoría.
-- Supabase Storage guarda imágenes y PDFs.
+- Supabase PostgreSQL guarda perfiles internos, roles, publicaciones, trámites, documentos, alcaldes, contactos, adjuntos y auditoría.
+- Supabase Storage guarda imágenes, PDFs, DOCX y respaldos de publicaciones.
 - Cloudflare puede manejar dominio, DNS y HTTPS, pero no ejecuta Flask por sí solo.
 
 ## 1. Crear Supabase
@@ -29,6 +29,16 @@ municipalidad-marcala
 
 3. Para esta primera demo, hacerlo **public bucket**.
 4. Guardar el nombre exacto del bucket para la variable `SUPABASE_BUCKET`.
+
+El sistema sube archivos en estas carpetas del bucket:
+
+```text
+images/
+documents/
+attachments/
+```
+
+`attachments/` se usa para respaldos de artículos: PDF, DOCX o imágenes descargables.
 
 ## 3. Variables de entorno
 
@@ -60,11 +70,13 @@ Notas:
 
 Cloudflare Pages no ejecuta esta versión editable porque necesita Python, sesiones, base de datos y subida de archivos.
 
-Usar uno de estos:
+Usar uno de estos para ejecutar Python:
 
 - Render
 - Railway
 - Fly.io
+
+GitHub queda como repositorio fuente. Cada `git push` a `main` puede disparar un nuevo despliegue en el host elegido. Cloudflare queda para dominio, DNS, HTTPS y protección.
 
 Configuración típica:
 
@@ -75,6 +87,8 @@ Root directory: vacío, si el repositorio es `municipio-site` y contiene `app.py
 ```
 
 El repositorio actual `r92ubuntu/municipio-site` tiene `app.py` en la raíz, por eso no uses `municipalidad_marcala` como root directory.
+
+Para el repositorio actual de trabajo, usa la raíz del proyecto donde están `app.py`, `requirements.txt` y `Procfile`.
 
 ## 5. Login y contraseñas
 
@@ -93,7 +107,62 @@ Supabase guarda y valida las contraseñas. La tabla interna `users` queda para c
 
 Cuando crees usuarios desde el panel, la app también intentará crearlos/actualizarlos en Supabase Auth usando `SUPABASE_SERVICE_ROLE_KEY`.
 
-## 6. Cloudflare
+## 6. Contactos e importación
+
+El panel tiene una sección **Contactos** para autoridades, empleados, oficinas y puntos de atención.
+
+Puede cargarse contacto por contacto o importar un archivo CSV, XLS o XLSX con columnas como:
+
+```text
+nombre, area, cargo, cel, correo, oficina, foto, biografia, estado, etiquetas, orden
+```
+
+Notas:
+
+- `estado` puede ser `published`, `draft` o `archived`.
+- Si no se indica estado, la importación publica el contacto.
+- `foto` puede ser una URL pública o una ruta ya subida, por ejemplo `images/foto.jpg`.
+- Si existe el mismo correo o enlace interno, el registro se actualiza.
+
+## 7. Participación ciudadana
+
+El sitio tiene una sección pública:
+
+```text
+/participacion
+```
+
+Permite recibir:
+
+- Denuncias
+- Sugerencias
+- Peticiones
+
+El ciudadano puede enviar la solicitud anónima o pedir respuesta dejando nombre, teléfono y/o correo. También puede adjuntar PDF, DOCX o imágenes como respaldo.
+
+La solicitud no se publica en el sitio. Solo se revisa desde:
+
+```text
+/admin/participacion
+```
+
+Estados internos:
+
+```text
+nuevo
+en_tramite
+resuelto
+irrelevante
+```
+
+Recomendación para producción:
+
+- Mantener estos registros en base de datos, sin borrado desde el panel.
+- Agregar CAPTCHA o Turnstile de Cloudflare antes de abrirlo al público para reducir spam.
+- Limitar tamaño de adjuntos y revisar permisos del bucket de Supabase Storage.
+- Crear un rol/editor municipal responsable de revisar esta bandeja.
+
+## 8. Cloudflare
 
 Cuando el host Python entregue una URL estable:
 
@@ -102,7 +171,7 @@ Cuando el host Python entregue una URL estable:
 3. Activar proxy naranja si el host lo permite.
 4. Mantener HTTPS activo.
 
-## 7. Diferencia con la versión pública rápida
+## 9. Diferencia con la versión pública rápida
 
 La carpeta `public_build` sirve para demos estáticas.
 

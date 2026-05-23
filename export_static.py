@@ -42,6 +42,8 @@ def public_routes() -> list[str]:
         "/actualidad",
         "/transparencia",
         "/municipalidad",
+        "/contactos",
+        "/participacion",
         "/agenda",
         "/privacidad",
         "/buscar",
@@ -52,6 +54,8 @@ def public_routes() -> list[str]:
     routes.extend(f"/tramites/{row['slug']}" for row in query_all("SELECT slug FROM services WHERE status='published'"))
     routes.extend(f"/transparencia/{row['slug']}" for row in query_all("SELECT slug FROM documents WHERE status='published'"))
     routes.extend(f"/municipalidad/alcaldes/{row['slug']}" for row in query_all("SELECT slug FROM mayors WHERE status='published'"))
+    routes.extend(f"/municipalidad/autoridades/{row['slug']}" for row in query_all("SELECT slug FROM municipal_authorities WHERE status='published'"))
+    routes.extend(f"/contactos/{row['slug']}" for row in query_all("SELECT slug FROM contacts WHERE status='published'"))
     return dedupe(routes)
 
 
@@ -84,6 +88,8 @@ def write_search_index() -> None:
         ("services", "Trámite", "title", "summary", "requirements", "/tramites/{slug}"),
         ("documents", "Transparencia", "title", "description", "department", "/transparencia/{slug}"),
         ("mayors", "Municipalidad", "name", "biography", "period_start", "/municipalidad/alcaldes/{slug}"),
+        ("municipal_authorities", "Autoridad municipal", "name", "biography", "position", "/municipalidad/autoridades/{slug}"),
+        ("contacts", "Contacto", "name", "position", "area", "/contactos/{slug}"),
     ]
     for table, label, title_field, summary_field, body_field, url_template in sources:
         for row in query_all(f"SELECT * FROM {table} WHERE status='published'"):

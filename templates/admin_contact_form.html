@@ -1,0 +1,39 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<header class="admin-feed-hero compact">
+  <div>
+    <p class="eyebrow">Directorio</p>
+    <h1>{{ "Editar" if item else "Nuevo" }} contacto</h1>
+    <p>Ficha pública para autoridad, empleado, oficina o punto de atención.</p>
+  </div>
+  <a class="admin-button secondary" href="/admin/contactos">Volver</a>
+</header>
+<form class="admin-form" method="post" enctype="multipart/form-data">
+  <div class="form-grid">
+    <label>Nombre<input name="name" required value="{{ item.name if item else '' }}"></label>
+    <details class="advanced-field">
+      <summary>Enlace de la página</summary>
+      <label>Texto del enlace interno
+        <input name="slug" value="{{ item.slug if item else '' }}" placeholder="Se genera automáticamente">
+      </label>
+    </details>
+    <label>Área<input name="area" value="{{ item.area if item else '' }}" placeholder="Secretaría Municipal"></label>
+    <label>Cargo<input name="position" value="{{ item.position if item else '' }}" placeholder="Coordinación, atención, dirección..."></label>
+    <label>Celular o teléfono<input name="phone" value="{{ item.phone if item else '' }}"></label>
+    <label>Correo<input type="email" name="email" value="{{ item.email if item else '' }}"></label>
+    <label>Oficina<input name="office" value="{{ item.office if item else '' }}"></label>
+    <label>Orden<input type="number" name="sort_order" value="{{ item.sort_order if item else 100 }}"></label>
+    <label>Estado<select name="status">{% for value, label in statuses %}<option value="{{ value }}" {{ 'selected' if item and item.status == value else '' }}>{{ label }}</option>{% endfor %}</select></label>
+    <label>Foto<input type="file" name="photo_file" accept=".jpg,.jpeg,.png,.webp"></label>
+  </div>
+  <label>Biografía o nota pública<textarea name="bio" rows="6">{{ item.bio if item else '' }}</textarea></label>
+  <label>Etiquetas <small>Máximo 4, separadas por coma.</small><input name="tags" value="{{ item.tags if item else '' }}"></label>
+  <div class="admin-form-actions">
+    <button class="button" type="submit" name="action" value="save_review">Guardar y revisar</button>
+    <button class="button ghost" type="submit" name="action" value="save_continue">Guardar y seguir editando</button>
+    {% if item and item.status == "published" %}
+    <a class="admin-button secondary" href="/contactos/{{ item.slug }}" target="_blank" rel="noopener">Ver publicación</a>
+    {% endif %}
+  </div>
+</form>
+{% endblock %}

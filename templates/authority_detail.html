@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{{ item.name }} | {{ site_name }}{% endblock %}
+{% block content %}
+<article class="article mayor-detail">
+  <header>
+    <span class="pill">{{ item.position or "Corporación municipal" }}</span>
+    <h1>{{ item.name }}</h1>
+    <p>{{ item.area }}{% if item.period %} · {{ item.period }}{% endif %}</p>
+  </header>
+  {% if item.photo_path %}<img class="article-image portrait-image" src="{{ asset_url(item.photo_path) }}" alt="{{ item.name }}">{% endif %}
+  <div class="info-grid">
+    {% if item.phone %}<span><strong>Teléfono:</strong> {{ item.phone }}</span>{% endif %}
+    {% if item.email %}<span><strong>Correo:</strong> <a href="mailto:{{ item.email }}">{{ item.email }}</a></span>{% endif %}
+  </div>
+  {% if item.biography %}<div class="rich-text">{{ item.biography|replace('\n', '<br>')|safe }}</div>{% endif %}
+  <div class="row-actions detail-actions">
+    <a class="admin-button secondary" href="/municipalidad#autoridades">Volver a autoridades</a>
+  </div>
+</article>
+{% endblock %}

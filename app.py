@@ -40,6 +40,16 @@ try:
 except ImportError:  # Supabase Storage is optional in local mode.
     create_client = None
 
+try:
+    import openpyxl
+except ImportError:  # Excel import is optional until dependencies are installed.
+    openpyxl = None
+
+try:
+    import xlrd
+except ImportError:  # Legacy .xls import is optional until dependencies are installed.
+    xlrd = None
+
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = Path(os.environ.get("DATA_DIR", BASE_DIR / "data"))
@@ -61,6 +71,8 @@ INITIAL_ADMIN_EMAIL = os.environ.get("INITIAL_ADMIN_EMAIL", "1208agente@gmail.co
 INITIAL_ADMIN_PASSWORD = os.environ.get("INITIAL_ADMIN_PASSWORD", "change-me-local")
 ALLOWED_IMAGES = {"jpg", "jpeg", "png", "webp"}
 ALLOWED_DOCUMENTS = {"pdf"}
+ALLOWED_ATTACHMENTS = {"pdf", "docx", "jpg", "jpeg", "png", "webp"}
+ALLOWED_IMPORTS = {"csv", "xlsx", "xls"}
 
 CONTENT_CATEGORIES = [
     ("noticias", "Noticias"),
@@ -87,6 +99,19 @@ STATUSES = [
     ("archived", "Archivado"),
 ]
 
+CIVIC_REQUEST_TYPES = [
+    ("denuncia", "Denuncia"),
+    ("sugerencia", "Sugerencia"),
+    ("peticion", "Petición"),
+]
+
+CIVIC_REQUEST_STATUSES = [
+    ("nuevo", "Nuevo"),
+    ("en_tramite", "En trámite"),
+    ("resuelto", "Resuelto"),
+    ("irrelevante", "Irrelevante"),
+]
+
 
 def create_app() -> Flask:
     app = Flask(__name__)
@@ -99,6 +124,7 @@ def create_app() -> Flask:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     (UPLOAD_DIR / "images").mkdir(parents=True, exist_ok=True)
     (UPLOAD_DIR / "documents").mkdir(parents=True, exist_ok=True)
+    (UPLOAD_DIR / "attachments").mkdir(parents=True, exist_ok=True)
     init_db()
 
     @app.context_processor
@@ -109,6 +135,8 @@ def create_app() -> Flask:
             "content_categories": CONTENT_CATEGORIES,
             "document_categories": DOCUMENT_CATEGORIES,
             "statuses": STATUSES,
+            "civic_request_types": CIVIC_REQUEST_TYPES,
+            "civic_request_statuses": CIVIC_REQUEST_STATUSES,
             "trending_tags": trending_tags(),
             "asset_url": asset_url,
             "split_tags": split_tags,
@@ -165,7 +193,7 @@ def create_app() -> Flask:
             services=services,
             docs=docs,
             current_mayor=current_mayor,
-            hero_image=get_setting("hero_image", "images/hero-marcala.jpg"),
+            hero_images=hero_images(),
             hero_title=get_setting("hero_title", "Marcala avanza con su gente"),
             hero_summary=get_setting(
                 "hero_summary",
@@ -196,7 +224,8 @@ def create_app() -> Flask:
         item = query_one("SELECT * FROM content WHERE slug = ? AND status = 'published'", [slug])
         if not item:
             abort(404)
-        return render_template("content_detail.html", item=item)
+        attachments = content_attachments(item["id"])
+        return render_template("content_detail.html", item=item, attachments=attachments)
 
     @app.get("/admin/<kind>/<int:record_id>/vista")
     @login_required
@@ -247,20 +276,69 @@ def create_app() -> Flask:
         current_mayor = query_one(
             "SELECT * FROM mayors WHERE is_current = 1 AND status = 'published' LIMIT 1"
         )
+        authorities = query_all(
+            """
+            SELECT * FROM municipal_authorities
+            WHERE status = 'published'
+            ORDER BY sort_order ASC, name ASC
+            """
+        )
         former_mayors = query_all(
             """
             SELECT * FROM mayors
-            WHERE status = 'published' AND is_current = 0
-            ORDER BY period_start DESC
+            WHERE status = 'published'
+            ORDER BY is_current DESC, period_start DESC
             """
         )
         return render_template(
             "municipality.html",
             history_title=get_setting("history_title", "Historia de Marcala"),
             history_body=get_setting("history_body", sample_history()),
+            authorities=authorities,
             current_mayor=current_mayor,
             former_mayors=former_mayors,
         )
+
+    @app.get("/municipalidad/autoridades/<slug>")
+    def authority_detail(slug: str):
+        item = query_one("SELECT * FROM municipal_authorities WHERE slug = ? AND status = 'published'", [slug])
+        if not item:
+            abort(404)
+        return render_template("authority_detail.html", item=item)
+
+    @app.get("/contactos")
+    def contacts():
+        area = request.args.get("area", "todos")
+        params: list[Any] = []
+        where = "status = 'published'"
+        if area != "todos":
+            where += " AND area = ?"
+            params.append(area)
+        items = query_all(
+            f"""
+            SELECT * FROM contacts
+            WHERE {where}
+            ORDER BY sort_order ASC, area ASC, name ASC
+            """,
+            params,
+        )
+        areas = query_all("SELECT DISTINCT area FROM contacts WHERE status = 'published' AND area <> '' ORDER BY area")
+        return render_template("contacts.html", items=items, areas=areas, selected_area=area)
+
+    @app.get("/contactos/<slug>")
+    def contact_detail(slug: str):
+        item = query_one("SELECT * FROM contacts WHERE slug = ? AND status = 'published'", [slug])
+        if not item:
+            abort(404)
+        return render_template("contact_detail.html", item=item)
+
+    @app.route("/participacion", methods=["GET", "POST"])
+    def civic_request_public():
+        if request.method == "POST":
+            record_id = save_civic_request()
+            item = query_one("SELECT * FROM civic_requests WHERE id = ?", [record_id])
+            return render_template("civic_request_thanks.html", item=item)
+        return render_template("civic_request_form.html")
 
     @app.get("/municipalidad/alcaldes/<slug>")
     def mayor_detail(slug: str):
@@ -375,14 +453,47 @@ def create_app() -> Flask:
             },
             {
                 "id": "alcaldes",
-                "label": "Alcaldes",
-                "description": "Biografías e historia institucional.",
+                "label": "Historial de alcaldes",
+                "description": "Alcaldes actuales y anteriores, con biografías.",
                 "count": query_value("SELECT COUNT(*) FROM mayors"),
                 "records": query_all("SELECT * FROM mayors ORDER BY is_current DESC, period_start DESC LIMIT 6"),
                 "new_url": url_for("admin_mayor_new"),
                 "edit_base": "/admin/alcaldes",
                 "title_field": "name",
                 "meta_field": "period_start",
+            },
+            {
+                "id": "autoridades",
+                "label": "Corporación municipal",
+                "description": "Miembros actuales de la corporación municipal.",
+                "count": query_value("SELECT COUNT(*) FROM municipal_authorities"),
+                "records": query_all("SELECT * FROM municipal_authorities ORDER BY sort_order ASC, updated_at DESC LIMIT 6"),
+                "new_url": url_for("admin_authority_new"),
+                "edit_base": "/admin/autoridades",
+                "title_field": "name",
+                "meta_field": "position",
+            },
+            {
+                "id": "contactos",
+                "label": "Contactos",
+                "description": "Autoridades, empleados y oficinas de atención.",
+                "count": query_value("SELECT COUNT(*) FROM contacts"),
+                "records": query_all("SELECT * FROM contacts ORDER BY updated_at DESC, created_at DESC LIMIT 6"),
+                "new_url": url_for("admin_contact_new"),
+                "edit_base": "/admin/contactos",
+                "title_field": "name",
+                "meta_field": "area",
+            },
+            {
+                "id": "participacion",
+                "label": "Participación ciudadana",
+                "description": "Denuncias, sugerencias y peticiones recibidas.",
+                "count": query_value("SELECT COUNT(*) FROM civic_requests"),
+                "records": query_all("SELECT * FROM civic_requests ORDER BY created_at DESC LIMIT 6"),
+                "new_url": url_for("admin_civic_requests"),
+                "edit_base": "/admin/participacion",
+                "title_field": "subject",
+                "meta_field": "request_status",
             },
         ]
         return render_template("admin_home.html", sections=sections)
@@ -410,7 +521,7 @@ def create_app() -> Flask:
             record_id = save_content(kind)
             flash("Contenido creado.", "success")
             return redirect_after_content_save(kind, record_id)
-        return render_template("admin_content_form.html", item=None, kind=kind)
+        return render_template("admin_content_form.html", item=None, kind=kind, attachments=[])
 
     @app.route("/admin/<kind>/<int:record_id>", methods=["GET", "POST"])
     @login_required
@@ -424,7 +535,8 @@ def create_app() -> Flask:
             save_content(kind, item)
             flash("Contenido actualizado.", "success")
             return redirect_after_content_save(kind, record_id)
-        return render_template("admin_content_form.html", item=item, kind=kind)
+        attachments = content_attachments(item["id"])
+        return render_template("admin_content_form.html", item=item, kind=kind, attachments=attachments)
 
     @app.get("/admin/<kind>/<int:record_id>/guardado")
     @login_required
@@ -435,7 +547,8 @@ def create_app() -> Flask:
         if not item:
             abort(404)
         public_url = url_for("actualidad_detail", slug=item["slug"]) if item["status"] == "published" else ""
-        return render_template("admin_content_saved.html", item=item, kind=kind, public_url=public_url)
+        attachments = content_attachments(item["id"])
+        return render_template("admin_content_saved.html", item=item, kind=kind, public_url=public_url, attachments=attachments)
 
     @app.get("/admin/tramites")
     @login_required
@@ -545,6 +658,131 @@ def create_app() -> Flask:
         public_url = url_for("mayor_detail", slug=item["slug"]) if item["status"] == "published" else ""
         return render_template("admin_mayor_saved.html", item=item, public_url=public_url)
 
+    @app.get("/admin/autoridades")
+    @login_required
+    def admin_authorities():
+        items = query_all("SELECT * FROM municipal_authorities ORDER BY sort_order ASC, name ASC")
+        return render_template("admin_authorities_list.html", items=items)
+
+    @app.route("/admin/autoridades/nuevo", methods=["GET", "POST"])
+    @login_required
+    def admin_authority_new():
+        if request.method == "POST":
+            record_id = save_authority()
+            flash("Autoridad creada.", "success")
+            return redirect_after_record_save("admin_authority_edit", "admin_authority_saved", record_id)
+        return render_template("admin_authority_form.html", item=None)
+
+    @app.route("/admin/autoridades/<int:record_id>", methods=["GET", "POST"])
+    @login_required
+    def admin_authority_edit(record_id: int):
+        item = query_one("SELECT * FROM municipal_authorities WHERE id = ?", [record_id])
+        if not item:
+            abort(404)
+        if request.method == "POST":
+            save_authority(item)
+            flash("Autoridad actualizada.", "success")
+            return redirect_after_record_save("admin_authority_edit", "admin_authority_saved", record_id)
+        return render_template("admin_authority_form.html", item=item)
+
+    @app.get("/admin/autoridades/<int:record_id>/guardado")
+    @login_required
+    def admin_authority_saved(record_id: int):
+        item = query_one("SELECT * FROM municipal_authorities WHERE id = ?", [record_id])
+        if not item:
+            abort(404)
+        public_url = url_for("authority_detail", slug=item["slug"]) if item["status"] == "published" else ""
+        return render_template("admin_authority_saved.html", item=item, public_url=public_url)
+
+    @app.get("/admin/contactos")
+    @login_required
+    def admin_contacts():
+        items = query_all("SELECT * FROM contacts ORDER BY sort_order ASC, area ASC, name ASC")
+        return render_template("admin_contacts_list.html", items=items)
+
+    @app.route("/admin/contactos/nuevo", methods=["GET", "POST"])
+    @login_required
+    def admin_contact_new():
+        if request.method == "POST":
+            record_id = save_contact()
+            flash("Contacto creado.", "success")
+            return redirect_after_record_save("admin_contact_edit", "admin_contact_saved", record_id)
+        return render_template("admin_contact_form.html", item=None)
+
+    @app.route("/admin/contactos/<int:record_id>", methods=["GET", "POST"])
+    @login_required
+    def admin_contact_edit(record_id: int):
+        item = query_one("SELECT * FROM contacts WHERE id = ?", [record_id])
+        if not item:
+            abort(404)
+        if request.method == "POST":
+            save_contact(item)
+            flash("Contacto actualizado.", "success")
+            return redirect_after_record_save("admin_contact_edit", "admin_contact_saved", record_id)
+        return render_template("admin_contact_form.html", item=item)
+
+    @app.get("/admin/contactos/<int:record_id>/guardado")
+    @login_required
+    def admin_contact_saved(record_id: int):
+        item = query_one("SELECT * FROM contacts WHERE id = ?", [record_id])
+        if not item:
+            abort(404)
+        public_url = url_for("contact_detail", slug=item["slug"]) if item["status"] == "published" else ""
+        return render_template("admin_contact_saved.html", item=item, public_url=public_url)
+
+    @app.route("/admin/contactos/importar", methods=["GET", "POST"])
+    @login_required
+    def admin_contacts_import():
+        if request.method == "POST":
+            file = request.files.get("contacts_file")
+            if not file or not file.filename:
+                flash("Selecciona un archivo CSV, XLS o XLSX.", "error")
+                return redirect(url_for("admin_contacts_import"))
+            try:
+                count = import_contacts(file)
+            except RuntimeError as exc:
+                flash(str(exc), "error")
+                return redirect(url_for("admin_contacts_import"))
+            flash(f"Se importaron o actualizaron {count} contactos.", "success")
+            return redirect(url_for("admin_contacts"))
+        return render_template("admin_contacts_import.html")
+
+    @app.get("/admin/participacion")
+    @login_required
+    def admin_civic_requests():
+        selected_status = request.args.get("estado", "todos")
+        selected_type = request.args.get("tipo", "todos")
+        params: list[Any] = []
+        where = "1=1"
+        if selected_status != "todos":
+            where += " AND request_status = ?"
+            params.append(selected_status)
+        if selected_type != "todos":
+            where += " AND request_type = ?"
+            params.append(selected_type)
+        items = query_all(
+            f"""
+            SELECT * FROM civic_requests
+            WHERE {where}
+            ORDER BY created_at DESC
+            """,
+            params,
+        )
+        return render_template("admin_civic_requests_list.html", items=items, selected_status=selected_status, selected_type=selected_type)
+
+    @app.route("/admin/participacion/<int:record_id>", methods=["GET", "POST"])
+    @login_required
+    def admin_civic_request_detail(record_id: int):
+        item = query_one("SELECT * FROM civic_requests WHERE id = ?", [record_id])
+        if not item:
+            abort(404)
+        if request.method == "POST":
+            update_civic_request(item)
+            flash("Solicitud actualizada.", "success")
+            return redirect(url_for("admin_civic_request_detail", record_id=record_id))
+        attachments = civic_request_attachments(record_id)
+        return render_template("admin_civic_request_detail.html", item=item, attachments=attachments)
+
     @app.get("/admin/usuarios")
     @admin_required
     def admin_users():
@@ -587,6 +825,9 @@ def create_app() -> Flask:
             "site_name",
             "hero_title",
             "hero_summary",
+            "hero_image",
+            "hero_image_2",
+            "hero_image_3",
             "history_title",
             "history_body",
             "contact_phone",
@@ -597,14 +838,17 @@ def create_app() -> Flask:
             before = {key: get_setting(key, "") for key in keys}
             for key in keys:
                 set_setting(key, request.form.get(key, "").strip())
-            hero_file = request.files.get("hero_image_file")
-            if hero_file and hero_file.filename:
-                set_setting("hero_image", save_upload(hero_file, "images", ALLOWED_IMAGES))
+            for index, key in enumerate(["hero_image", "hero_image_2", "hero_image_3"], start=1):
+                hero_file = request.files.get(f"hero_image_file_{index}")
+                if hero_file and hero_file.filename:
+                    set_setting(key, save_upload(hero_file, "images", ALLOWED_IMAGES))
             audit("update", "settings", 0, "Configuración", changed_fields(before, {key: get_setting(key, "") for key in keys}))
             flash("Configuración actualizada.", "success")
             return redirect(url_for("admin_settings"))
         settings = {key: get_setting(key, "") for key in keys}
         settings["hero_image"] = get_setting("hero_image", "images/hero-marcala.jpg")
+        settings["hero_image_2"] = get_setting("hero_image_2", "images/hero-town-hall.webp")
+        settings["hero_image_3"] = get_setting("hero_image_3", "images/hero-community.webp")
         return render_template("admin_settings.html", settings=settings)
 
     @app.get("/admin/auditoria")
@@ -643,12 +887,16 @@ def run_schema_migrations() -> None:
     if USE_POSTGRES:
         execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS supabase_user_id TEXT")
         execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_supabase_user_id ON users(supabase_user_id)")
+        for statement in supplemental_schema(postgres=True):
+            execute(statement)
         return
     columns = query_all("PRAGMA table_info(users)")
     existing = {row["name"] for row in columns}
     if "supabase_user_id" not in existing:
         execute("ALTER TABLE users ADD COLUMN supabase_user_id TEXT")
     execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_supabase_user_id ON users(supabase_user_id)")
+    with get_db() as db:
+        db.executescript("\n".join(supplemental_schema(postgres=False)))
 
 
 def sqlite_schema() -> str:
@@ -748,6 +996,82 @@ def sqlite_schema() -> str:
       updated_by INTEGER,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS municipal_authorities (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      slug TEXT NOT NULL UNIQUE,
+      position TEXT,
+      area TEXT,
+      period TEXT,
+      phone TEXT,
+      email TEXT,
+      biography TEXT,
+      photo_path TEXT,
+      sort_order INTEGER NOT NULL DEFAULT 100,
+      status TEXT NOT NULL DEFAULT 'draft',
+      tags TEXT,
+      created_by INTEGER,
+      updated_by INTEGER,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS contacts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      slug TEXT NOT NULL UNIQUE,
+      area TEXT,
+      position TEXT,
+      phone TEXT,
+      email TEXT,
+      office TEXT,
+      bio TEXT,
+      photo_path TEXT,
+      sort_order INTEGER NOT NULL DEFAULT 100,
+      status TEXT NOT NULL DEFAULT 'draft',
+      tags TEXT,
+      created_by INTEGER,
+      updated_by INTEGER,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS content_attachments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      content_id INTEGER NOT NULL,
+      title TEXT,
+      file_path TEXT NOT NULL,
+      file_type TEXT,
+      sort_order INTEGER NOT NULL DEFAULT 100,
+      created_by INTEGER,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS civic_requests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      folio TEXT NOT NULL UNIQUE,
+      request_type TEXT NOT NULL DEFAULT 'peticion',
+      subject TEXT NOT NULL,
+      body TEXT NOT NULL,
+      wants_response INTEGER NOT NULL DEFAULT 0,
+      requester_name TEXT,
+      requester_phone TEXT,
+      requester_email TEXT,
+      request_status TEXT NOT NULL DEFAULT 'nuevo',
+      internal_notes TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS civic_request_attachments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      request_id INTEGER NOT NULL,
+      title TEXT,
+      file_path TEXT NOT NULL,
+      file_type TEXT,
+      created_at TEXT NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS audit_logs (
@@ -872,6 +1196,87 @@ def postgres_schema() -> list[str]:
         )
         """,
         """
+        CREATE TABLE IF NOT EXISTS municipal_authorities (
+          id INTEGER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+          name TEXT NOT NULL,
+          slug TEXT NOT NULL UNIQUE,
+          position TEXT,
+          area TEXT,
+          period TEXT,
+          phone TEXT,
+          email TEXT,
+          biography TEXT,
+          photo_path TEXT,
+          sort_order INTEGER NOT NULL DEFAULT 100,
+          status TEXT NOT NULL DEFAULT 'draft',
+          tags TEXT,
+          created_by INTEGER,
+          updated_by INTEGER,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS contacts (
+          id INTEGER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+          name TEXT NOT NULL,
+          slug TEXT NOT NULL UNIQUE,
+          area TEXT,
+          position TEXT,
+          phone TEXT,
+          email TEXT,
+          office TEXT,
+          bio TEXT,
+          photo_path TEXT,
+          sort_order INTEGER NOT NULL DEFAULT 100,
+          status TEXT NOT NULL DEFAULT 'draft',
+          tags TEXT,
+          created_by INTEGER,
+          updated_by INTEGER,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS content_attachments (
+          id INTEGER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+          content_id INTEGER NOT NULL,
+          title TEXT,
+          file_path TEXT NOT NULL,
+          file_type TEXT,
+          sort_order INTEGER NOT NULL DEFAULT 100,
+          created_by INTEGER,
+          created_at TEXT NOT NULL
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS civic_requests (
+          id INTEGER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+          folio TEXT NOT NULL UNIQUE,
+          request_type TEXT NOT NULL DEFAULT 'peticion',
+          subject TEXT NOT NULL,
+          body TEXT NOT NULL,
+          wants_response INTEGER NOT NULL DEFAULT 0,
+          requester_name TEXT,
+          requester_phone TEXT,
+          requester_email TEXT,
+          request_status TEXT NOT NULL DEFAULT 'nuevo',
+          internal_notes TEXT,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS civic_request_attachments (
+          id INTEGER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+          request_id INTEGER NOT NULL,
+          title TEXT,
+          file_path TEXT NOT NULL,
+          file_type TEXT,
+          created_at TEXT NOT NULL
+        )
+        """,
+        """
         CREATE TABLE IF NOT EXISTS audit_logs (
           id INTEGER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
           user_id INTEGER,
@@ -885,6 +1290,176 @@ def postgres_schema() -> list[str]:
           user_agent TEXT,
           created_at TEXT NOT NULL
         )
+        """,
+    ]
+
+
+def supplemental_schema(postgres: bool) -> list[str]:
+    if postgres:
+        return [
+            """
+            CREATE TABLE IF NOT EXISTS contacts (
+              id INTEGER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+              name TEXT NOT NULL,
+              slug TEXT NOT NULL UNIQUE,
+              area TEXT,
+              position TEXT,
+              phone TEXT,
+              email TEXT,
+              office TEXT,
+              bio TEXT,
+              photo_path TEXT,
+              sort_order INTEGER NOT NULL DEFAULT 100,
+              status TEXT NOT NULL DEFAULT 'draft',
+              tags TEXT,
+              created_by INTEGER,
+              updated_by INTEGER,
+              created_at TEXT NOT NULL,
+              updated_at TEXT NOT NULL
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS municipal_authorities (
+              id INTEGER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+              name TEXT NOT NULL,
+              slug TEXT NOT NULL UNIQUE,
+              position TEXT,
+              area TEXT,
+              period TEXT,
+              phone TEXT,
+              email TEXT,
+              biography TEXT,
+              photo_path TEXT,
+              sort_order INTEGER NOT NULL DEFAULT 100,
+              status TEXT NOT NULL DEFAULT 'draft',
+              tags TEXT,
+              created_by INTEGER,
+              updated_by INTEGER,
+              created_at TEXT NOT NULL,
+              updated_at TEXT NOT NULL
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS content_attachments (
+              id INTEGER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+              content_id INTEGER NOT NULL,
+              title TEXT,
+              file_path TEXT NOT NULL,
+              file_type TEXT,
+              sort_order INTEGER NOT NULL DEFAULT 100,
+              created_by INTEGER,
+              created_at TEXT NOT NULL
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS civic_requests (
+              id INTEGER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+              folio TEXT NOT NULL UNIQUE,
+              request_type TEXT NOT NULL DEFAULT 'peticion',
+              subject TEXT NOT NULL,
+              body TEXT NOT NULL,
+              wants_response INTEGER NOT NULL DEFAULT 0,
+              requester_name TEXT,
+              requester_phone TEXT,
+              requester_email TEXT,
+              request_status TEXT NOT NULL DEFAULT 'nuevo',
+              internal_notes TEXT,
+              created_at TEXT NOT NULL,
+              updated_at TEXT NOT NULL
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS civic_request_attachments (
+              id INTEGER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+              request_id INTEGER NOT NULL,
+              title TEXT,
+              file_path TEXT NOT NULL,
+              file_type TEXT,
+              created_at TEXT NOT NULL
+            )
+            """,
+        ]
+    return [
+        """
+        CREATE TABLE IF NOT EXISTS contacts (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          slug TEXT NOT NULL UNIQUE,
+          area TEXT,
+          position TEXT,
+          phone TEXT,
+          email TEXT,
+          office TEXT,
+          bio TEXT,
+          photo_path TEXT,
+          sort_order INTEGER NOT NULL DEFAULT 100,
+          status TEXT NOT NULL DEFAULT 'draft',
+          tags TEXT,
+          created_by INTEGER,
+          updated_by INTEGER,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        );
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS municipal_authorities (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          slug TEXT NOT NULL UNIQUE,
+          position TEXT,
+          area TEXT,
+          period TEXT,
+          phone TEXT,
+          email TEXT,
+          biography TEXT,
+          photo_path TEXT,
+          sort_order INTEGER NOT NULL DEFAULT 100,
+          status TEXT NOT NULL DEFAULT 'draft',
+          tags TEXT,
+          created_by INTEGER,
+          updated_by INTEGER,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        );
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS content_attachments (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          content_id INTEGER NOT NULL,
+          title TEXT,
+          file_path TEXT NOT NULL,
+          file_type TEXT,
+          sort_order INTEGER NOT NULL DEFAULT 100,
+          created_by INTEGER,
+          created_at TEXT NOT NULL
+        );
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS civic_requests (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          folio TEXT NOT NULL UNIQUE,
+          request_type TEXT NOT NULL DEFAULT 'peticion',
+          subject TEXT NOT NULL,
+          body TEXT NOT NULL,
+          wants_response INTEGER NOT NULL DEFAULT 0,
+          requester_name TEXT,
+          requester_phone TEXT,
+          requester_email TEXT,
+          request_status TEXT NOT NULL DEFAULT 'nuevo',
+          internal_notes TEXT,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        );
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS civic_request_attachments (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          request_id INTEGER NOT NULL,
+          title TEXT,
+          file_path TEXT NOT NULL,
+          file_type TEXT,
+          created_at TEXT NOT NULL
+        );
         """,
     ]
 
@@ -910,6 +1485,8 @@ def seed_data() -> None:
         "hero_title": "Marcala avanza con su gente",
         "hero_summary": "Información municipal, trámites, actualidad, transparencia y servicios para la ciudadanía.",
         "hero_image": "images/hero-marcala.jpg",
+        "hero_image_2": "images/hero-town-hall.webp",
+        "hero_image_3": "images/hero-community.webp",
         "history_title": "Historia de Marcala",
         "history_body": sample_history(),
         "contact_phone": "+504 0000-0000",
@@ -958,6 +1535,52 @@ def seed_data() -> None:
                 2026,
                 "Secretaría Municipal",
                 "transparencia, informe",
+                now,
+                now,
+            ],
+        )
+    if not query_one("SELECT id FROM contacts LIMIT 1"):
+        execute(
+            """
+            INSERT INTO contacts
+            (name, slug, area, position, phone, email, office, bio, photo_path, sort_order, status, tags, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'published', ?, ?, ?)
+            """,
+            [
+                "Atención ciudadana",
+                "atencion-ciudadana",
+                "Secretaría Municipal",
+                "Ventanilla de información",
+                "+504 0000-0000",
+                "info@municipalidadmarcala.hn",
+                "Palacio Municipal",
+                "Contacto de muestra para orientar a la ciudadanía. Puede reemplazarse por autoridades, jefaturas o empleados con datos oficiales.",
+                "",
+                10,
+                "contacto, atencion",
+                now,
+                now,
+            ],
+        )
+    if not query_one("SELECT id FROM municipal_authorities LIMIT 1"):
+        execute(
+            """
+            INSERT INTO municipal_authorities
+            (name, slug, position, area, period, phone, email, biography, photo_path, sort_order, status, tags, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'published', ?, ?, ?)
+            """,
+            [
+                "Miembro de la corporación municipal",
+                "miembro-corporacion-municipal",
+                "Regiduría municipal",
+                "Corporación Municipal",
+                "2026-2030",
+                "",
+                "",
+                "Ficha editable para cargar los miembros actuales de la corporación municipal con fotografía, cargo, contacto y reseña pública.",
+                "",
+                20,
+                "corporacion, municipalidad",
                 now,
                 now,
             ],
@@ -1064,7 +1687,7 @@ def prepare_sql(sql: str) -> str:
 def sql_returns_id(sql: str) -> bool:
     return bool(
         re.match(
-            r"^\s*INSERT\s+INTO\s+(users|content|services|documents|mayors|audit_logs)\b",
+            r"^\s*INSERT\s+INTO\s+(users|content|services|documents|mayors|municipal_authorities|contacts|content_attachments|civic_requests|civic_request_attachments|audit_logs)\b",
             sql,
             flags=re.IGNORECASE,
         )
@@ -1255,6 +1878,19 @@ def set_setting(key: str, value: str) -> None:
     )
 
 
+def hero_images() -> list[str]:
+    candidates = [
+        get_setting("hero_image", "images/hero-marcala.jpg"),
+        get_setting("hero_image_2", "images/hero-town-hall.webp"),
+        get_setting("hero_image_3", "images/hero-community.webp"),
+    ]
+    clean: list[str] = []
+    for image in candidates:
+        if image and image not in clean:
+            clean.append(image)
+    return clean
+
+
 def save_content(kind: str, item: sqlite3.Row | None = None) -> int:
     now = utc_now()
     user = current_user()
@@ -1292,6 +1928,7 @@ def save_content(kind: str, item: sqlite3.Row | None = None) -> int:
             """,
             list(values.values()) + [item["id"]],
         )
+        save_content_attachments(int(item["id"]))
         audit("update", "content", item["id"], title, changed_fields(before, values))
         return int(item["id"])
     record_id = execute(
@@ -1322,8 +1959,45 @@ def save_content(kind: str, item: sqlite3.Row | None = None) -> int:
             now,
         ],
     )
+    save_content_attachments(record_id)
     audit("create", "content", record_id, title)
     return record_id
+
+
+def content_attachments(content_id: int) -> list[Any]:
+    return query_all(
+        """
+        SELECT * FROM content_attachments
+        WHERE content_id = ?
+        ORDER BY sort_order ASC, id ASC
+        """,
+        [content_id],
+    )
+
+
+def save_content_attachments(content_id: int) -> None:
+    user = current_user()
+    now = utc_now()
+    remove_ids = [int(value) for value in request.form.getlist("remove_attachment") if value.isdigit()]
+    for attachment_id in remove_ids:
+        execute("DELETE FROM content_attachments WHERE id = ? AND content_id = ?", [attachment_id, content_id])
+    files = request.files.getlist("attachment_files")
+    title_map = request.form.getlist("attachment_titles")
+    for index, file in enumerate(files):
+        if not file or not file.filename:
+            continue
+        file_path = save_upload(file, "attachments", ALLOWED_ATTACHMENTS)
+        original_name = secure_filename(file.filename or "")
+        extension = original_name.rsplit(".", 1)[-1].lower() if "." in original_name else ""
+        title = title_map[index].strip() if index < len(title_map) and title_map[index].strip() else original_name
+        execute(
+            """
+            INSERT INTO content_attachments
+            (content_id, title, file_path, file_type, sort_order, created_by, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            [content_id, title, file_path, extension, 100 + index, user["id"] if user else None, now],
+        )
 
 
 def save_service(item: sqlite3.Row | None = None) -> int:
@@ -1519,6 +2193,325 @@ def save_mayor(item: sqlite3.Row | None = None) -> int:
     return record_id
 
 
+def save_authority(item: sqlite3.Row | None = None) -> int:
+    now = utc_now()
+    user = current_user()
+    name = request.form.get("name", "").strip()
+    photo_path = item["photo_path"] if item else ""
+    file = request.files.get("photo_file")
+    if file and file.filename:
+        photo_path = save_upload(file, "images", ALLOWED_IMAGES)
+    sort_order = request.form.get("sort_order", "").strip()
+    values = {
+        "name": name,
+        "slug": unique_slug(request.form.get("slug", "").strip() or name, "municipal_authorities", item["id"] if item else None),
+        "position": request.form.get("position", "").strip(),
+        "area": request.form.get("area", "").strip(),
+        "period": request.form.get("period", "").strip(),
+        "phone": request.form.get("phone", "").strip(),
+        "email": request.form.get("email", "").strip(),
+        "biography": request.form.get("biography", "").strip(),
+        "photo_path": photo_path,
+        "sort_order": int(sort_order) if sort_order.isdigit() else 100,
+        "status": request.form.get("status", "draft"),
+        "tags": clean_tags(request.form.get("tags", "")),
+        "updated_by": user["id"] if user else None,
+        "updated_at": now,
+    }
+    if item:
+        before = dict(item)
+        execute(
+            """
+            UPDATE municipal_authorities SET name=?, slug=?, position=?, area=?, period=?, phone=?, email=?,
+            biography=?, photo_path=?, sort_order=?, status=?, tags=?, updated_by=?, updated_at=? WHERE id=?
+            """,
+            list(values.values()) + [item["id"]],
+        )
+        audit("update", "municipal_authorities", item["id"], name, changed_fields(before, values))
+        return int(item["id"])
+    record_id = execute(
+        """
+        INSERT INTO municipal_authorities
+        (name, slug, position, area, period, phone, email, biography, photo_path, sort_order, status,
+        tags, created_by, updated_by, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        [
+            values["name"], values["slug"], values["position"], values["area"], values["period"],
+            values["phone"], values["email"], values["biography"], values["photo_path"], values["sort_order"],
+            values["status"], values["tags"], user["id"] if user else None, user["id"] if user else None,
+            now, now,
+        ],
+    )
+    audit("create", "municipal_authorities", record_id, name)
+    return record_id
+
+
+def save_contact(item: sqlite3.Row | None = None) -> int:
+    now = utc_now()
+    user = current_user()
+    name = request.form.get("name", "").strip()
+    photo_path = item["photo_path"] if item else ""
+    file = request.files.get("photo_file")
+    if file and file.filename:
+        photo_path = save_upload(file, "images", ALLOWED_IMAGES)
+    sort_order = request.form.get("sort_order", "").strip()
+    values = {
+        "name": name,
+        "slug": unique_slug(request.form.get("slug", "").strip() or name, "contacts", item["id"] if item else None),
+        "area": request.form.get("area", "").strip(),
+        "position": request.form.get("position", "").strip(),
+        "phone": request.form.get("phone", "").strip(),
+        "email": request.form.get("email", "").strip(),
+        "office": request.form.get("office", "").strip(),
+        "bio": request.form.get("bio", "").strip(),
+        "photo_path": photo_path,
+        "sort_order": int(sort_order) if sort_order.isdigit() else 100,
+        "status": request.form.get("status", "draft"),
+        "tags": clean_tags(request.form.get("tags", "")),
+        "updated_by": user["id"] if user else None,
+        "updated_at": now,
+    }
+    if item:
+        before = dict(item)
+        execute(
+            """
+            UPDATE contacts SET name=?, slug=?, area=?, position=?, phone=?, email=?, office=?,
+            bio=?, photo_path=?, sort_order=?, status=?, tags=?, updated_by=?, updated_at=? WHERE id=?
+            """,
+            list(values.values()) + [item["id"]],
+        )
+        audit("update", "contacts", item["id"], name, changed_fields(before, values))
+        return int(item["id"])
+    record_id = execute(
+        """
+        INSERT INTO contacts
+        (name, slug, area, position, phone, email, office, bio, photo_path, sort_order, status,
+        tags, created_by, updated_by, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        [
+            values["name"],
+            values["slug"],
+            values["area"],
+            values["position"],
+            values["phone"],
+            values["email"],
+            values["office"],
+            values["bio"],
+            values["photo_path"],
+            values["sort_order"],
+            values["status"],
+            values["tags"],
+            user["id"] if user else None,
+            user["id"] if user else None,
+            now,
+            now,
+        ],
+    )
+    audit("create", "contacts", record_id, name)
+    return record_id
+
+
+def import_contacts(file: Any) -> int:
+    filename = secure_filename(file.filename or "")
+    extension = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+    if extension not in ALLOWED_IMPORTS:
+        abort(400, f"Tipo de archivo no permitido: .{extension}")
+    rows = contact_rows_from_file(file, extension)
+    count = 0
+    for row in rows:
+        payload = normalize_contact_row(row)
+        if not payload["name"]:
+            continue
+        upsert_contact(payload)
+        count += 1
+    audit("import", "contacts", None, "Importación de contactos", f"{count} registros desde {filename}")
+    return count
+
+
+def contact_rows_from_file(file: Any, extension: str) -> list[dict[str, Any]]:
+    if extension == "csv":
+        text = file.read().decode("utf-8-sig")
+        return [dict(row) for row in csv.DictReader(io.StringIO(text))]
+    if extension == "xlsx":
+        if openpyxl is None:
+            raise RuntimeError("Para importar XLSX instala la dependencia openpyxl.")
+        workbook = openpyxl.load_workbook(file, data_only=True)
+        sheet = workbook.active
+        rows = list(sheet.iter_rows(values_only=True))
+        return rows_to_dicts(rows)
+    if extension == "xls":
+        if xlrd is None:
+            raise RuntimeError("Para importar XLS instala la dependencia xlrd.")
+        workbook = xlrd.open_workbook(file_contents=file.read())
+        sheet = workbook.sheet_by_index(0)
+        rows = [[sheet.cell_value(r, c) for c in range(sheet.ncols)] for r in range(sheet.nrows)]
+        return rows_to_dicts(rows)
+    return []
+
+
+def rows_to_dicts(rows: list[Any]) -> list[dict[str, Any]]:
+    if not rows:
+        return []
+    headers = [str(value or "").strip() for value in rows[0]]
+    records = []
+    for row in rows[1:]:
+        records.append({headers[index]: row[index] if index < len(row) else "" for index in range(len(headers))})
+    return records
+
+
+def normalize_contact_row(row: dict[str, Any]) -> dict[str, Any]:
+    def pick(*names: str) -> str:
+        normalized = {normalize_text(key).replace(" ", ""): value for key, value in row.items()}
+        for name in names:
+            value = normalized.get(normalize_text(name).replace(" ", ""), "")
+            if value is not None:
+                return str(value).strip()
+        return ""
+
+    sort_order = pick("orden", "order", "prioridad")
+    status = pick("estado", "status") or "published"
+    return {
+        "name": pick("nombre", "name", "mombre"),
+        "area": pick("area", "departamento", "dependencia"),
+        "position": pick("cargo", "puesto", "position"),
+        "phone": pick("cel", "celular", "telefono", "teléfono", "phone"),
+        "email": pick("correo", "email"),
+        "office": pick("oficina", "office", "ubicacion", "ubicación"),
+        "photo_path": pick("foto", "photo", "imagen"),
+        "bio": pick("biografia", "biografía", "bio", "descripcion", "descripción"),
+        "sort_order": int(float(sort_order)) if sort_order.replace(".", "", 1).isdigit() else 100,
+        "status": status if status in dict(STATUSES) else "published",
+        "tags": clean_tags(pick("etiquetas", "tags")),
+    }
+
+
+def upsert_contact(payload: dict[str, Any]) -> int:
+    now = utc_now()
+    user = current_user()
+    slug = slugify(f"{payload['name']} {payload['area']}")
+    existing = query_one("SELECT * FROM contacts WHERE slug = ?", [slug])
+    if not existing and payload["email"]:
+        existing = query_one("SELECT * FROM contacts WHERE email = ?", [payload["email"]])
+    if existing:
+        payload["slug"] = unique_slug(slug, "contacts", existing["id"])
+        payload["updated_by"] = user["id"] if user else None
+        payload["updated_at"] = now
+        before = dict(existing)
+        execute(
+            """
+            UPDATE contacts SET name=?, slug=?, area=?, position=?, phone=?, email=?, office=?,
+            bio=?, photo_path=?, sort_order=?, status=?, tags=?, updated_by=?, updated_at=? WHERE id=?
+            """,
+            [
+                payload["name"], payload["slug"], payload["area"], payload["position"], payload["phone"],
+                payload["email"], payload["office"], payload["bio"], payload["photo_path"], payload["sort_order"],
+                payload["status"], payload["tags"], payload["updated_by"], payload["updated_at"], existing["id"],
+            ],
+        )
+        audit("update", "contacts", existing["id"], payload["name"], changed_fields(before, payload))
+        return int(existing["id"])
+    record_id = execute(
+        """
+        INSERT INTO contacts
+        (name, slug, area, position, phone, email, office, bio, photo_path, sort_order, status,
+        tags, created_by, updated_by, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        [
+            payload["name"], unique_slug(slug, "contacts"), payload["area"], payload["position"],
+            payload["phone"], payload["email"], payload["office"], payload["bio"], payload["photo_path"],
+            payload["sort_order"], payload["status"], payload["tags"], user["id"] if user else None,
+            user["id"] if user else None, now, now,
+        ],
+    )
+    audit("create", "contacts", record_id, payload["name"])
+    return record_id
+
+
+def save_civic_request() -> int:
+    now = utc_now()
+    request_type = request.form.get("request_type", "peticion")
+    if request_type not in dict(CIVIC_REQUEST_TYPES):
+        request_type = "peticion"
+    wants_response = 1 if request.form.get("wants_response") == "on" else 0
+    subject = request.form.get("subject", "").strip()
+    body = request.form.get("body", "").strip()
+    if not subject or not body:
+        abort(400, "Debes indicar asunto y descripción.")
+    record_id = execute(
+        """
+        INSERT INTO civic_requests
+        (folio, request_type, subject, body, wants_response, requester_name, requester_phone,
+        requester_email, request_status, internal_notes, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'nuevo', '', ?, ?)
+        """,
+        [
+            generate_civic_folio(),
+            request_type,
+            subject,
+            body,
+            wants_response,
+            request.form.get("requester_name", "").strip() if wants_response else "",
+            request.form.get("requester_phone", "").strip() if wants_response else "",
+            request.form.get("requester_email", "").strip() if wants_response else "",
+            now,
+            now,
+        ],
+    )
+    save_civic_request_attachments(record_id)
+    audit("create", "civic_requests", record_id, subject, "Solicitud ciudadana recibida desde formulario público.")
+    return record_id
+
+
+def generate_civic_folio() -> str:
+    prefix = datetime.now(UTC).strftime("MRC-%Y%m%d")
+    count = query_value("SELECT COUNT(*) FROM civic_requests WHERE folio LIKE ?", [f"{prefix}-%"]) or 0
+    return f"{prefix}-{int(count) + 1:04d}"
+
+
+def save_civic_request_attachments(request_id: int) -> None:
+    now = utc_now()
+    files = request.files.getlist("attachment_files")
+    for file in files:
+        if not file or not file.filename:
+            continue
+        file_path = save_upload(file, "attachments", ALLOWED_ATTACHMENTS)
+        original_name = secure_filename(file.filename or "")
+        extension = original_name.rsplit(".", 1)[-1].lower() if "." in original_name else ""
+        execute(
+            """
+            INSERT INTO civic_request_attachments
+            (request_id, title, file_path, file_type, created_at)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            [request_id, original_name, file_path, extension, now],
+        )
+
+
+def civic_request_attachments(request_id: int) -> list[Any]:
+    return query_all(
+        "SELECT * FROM civic_request_attachments WHERE request_id = ? ORDER BY id ASC",
+        [request_id],
+    )
+
+
+def update_civic_request(item: Any) -> None:
+    now = utc_now()
+    status = request.form.get("request_status", "nuevo")
+    if status not in dict(CIVIC_REQUEST_STATUSES):
+        status = "nuevo"
+    notes = request.form.get("internal_notes", "").strip()
+    before = dict(item)
+    values = {"request_status": status, "internal_notes": notes, "updated_at": now}
+    execute(
+        "UPDATE civic_requests SET request_status=?, internal_notes=?, updated_at=? WHERE id=?",
+        [status, notes, now, item["id"]],
+    )
+    audit("update", "civic_requests", item["id"], item["subject"], changed_fields(before, values))
+
+
 def save_user(item: sqlite3.Row | None = None) -> int:
     now = utc_now()
     name = request.form.get("name", "").strip()
@@ -1623,7 +2616,7 @@ def split_tags(value: str | None) -> list[str]:
 
 def trending_tags() -> list[dict[str, Any]]:
     counts: dict[str, int] = {}
-    for table in ["content", "services", "documents", "mayors"]:
+    for table in ["content", "services", "documents", "mayors", "municipal_authorities", "contacts"]:
         for row in query_all(f"SELECT tags FROM {table} WHERE status = 'published'"):
             for tag in split_tags(row["tags"]):
                 counts[tag] = counts.get(tag, 0) + 1
@@ -1648,6 +2641,8 @@ def search_records(query: str, tag: str) -> list[dict[str, str]]:
         ("services", "Trámite", "title", "summary", "tags", "tramite_detail"),
         ("documents", "Transparencia", "title", "description", "tags", "document_detail"),
         ("mayors", "Municipalidad", "name", "biography", "tags", "mayor_detail"),
+        ("municipal_authorities", "Autoridad municipal", "name", "position", "tags", "authority_detail"),
+        ("contacts", "Contacto", "name", "position", "tags", "contact_detail"),
     ]
     for table, label, title_field, summary_field, tag_field, endpoint in sources:
         for row in query_all(f"SELECT * FROM {table} WHERE status = 'published'"):

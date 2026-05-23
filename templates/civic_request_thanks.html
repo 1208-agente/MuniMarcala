@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Solicitud recibida | {{ site_name }}{% endblock %}
+{% block content %}
+<section class="article">
+  <span class="pill">Solicitud recibida</span>
+  <h1>Gracias por enviar tu información</h1>
+  <p>Tu solicitud fue registrada con el folio:</p>
+  <p class="folio-code">{{ item.folio }}</p>
+  <p>Guarda este código para consultarlo con la municipalidad. El contenido no se publica en la página.</p>
+  <div class="row-actions detail-actions">
+    <a class="button" href="/participacion">Enviar otra solicitud</a>
+    <a class="admin-button secondary" href="/">Volver al inicio</a>
+  </div>
+</section>
+{% endblock %}

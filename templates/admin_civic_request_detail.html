@@ -1,0 +1,63 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<header class="admin-feed-hero compact">
+  <div>
+    <p class="eyebrow">Solicitud ciudadana</p>
+    <h1>{{ item.subject }}</h1>
+    <p>{{ item.folio }} · {{ item.request_type }} · {{ item.created_at|date_label }}</p>
+  </div>
+  <a class="admin-button secondary" href="/admin/participacion">Volver</a>
+</header>
+<section class="admin-feed-grid">
+  <article class="admin-feed-card">
+    <div class="admin-feed-card-head">
+      <div>
+        <span>{{ item.request_status }}</span>
+        <h2>Contenido recibido</h2>
+        <p>{{ "Solicita respuesta" if item.wants_response else "Anónimo o sin respuesta solicitada" }}</p>
+      </div>
+    </div>
+    <div class="review-body rich-text">{{ item.body|replace('\n', '<br>')|safe }}</div>
+    <div class="info-grid padded">
+      {% if item.requester_name %}<span><strong>Nombre:</strong> {{ item.requester_name }}</span>{% endif %}
+      {% if item.requester_phone %}<span><strong>Teléfono:</strong> {{ item.requester_phone }}</span>{% endif %}
+      {% if item.requester_email %}<span><strong>Correo:</strong> {{ item.requester_email }}</span>{% endif %}
+    </div>
+    {% if attachments %}
+    <div class="download-panel padded">
+      <h2>Archivos de respaldo</h2>
+      <div class="document-list">
+        {% for attachment in attachments %}
+        <a class="document-row" href="{{ asset_url(attachment.file_path) }}" target="_blank" rel="noopener">
+          <span>{{ attachment.file_type|upper }}</span>
+          <strong>{{ attachment.title }}</strong>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </article>
+  <article class="admin-feed-card">
+    <div class="admin-feed-card-head">
+      <div>
+        <span>Gestión interna</span>
+        <h2>Estado y seguimiento</h2>
+        <p>El registro queda conservado aunque se marque irrelevante o resuelto.</p>
+      </div>
+    </div>
+    <form class="admin-form embedded" method="post">
+      <label>Estado
+        <select name="request_status">
+          {% for value, label in civic_request_statuses %}
+          <option value="{{ value }}" {{ 'selected' if item.request_status == value else '' }}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Notas internas<textarea name="internal_notes" rows="8">{{ item.internal_notes }}</textarea></label>
+      <div class="admin-form-actions">
+        <button class="button" type="submit">Guardar seguimiento</button>
+      </div>
+    </form>
+  </article>
+</section>
+{% endblock %}
