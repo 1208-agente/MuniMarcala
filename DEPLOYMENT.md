@@ -44,18 +44,20 @@ Abrir:
 http://127.0.0.1:8088/
 ```
 
-### Publicar con GitHub + Cloudflare Pages
+### Publicar con GitHub + Cloudflare
 
-1. Crear un repositorio en GitHub.
-2. Subir el proyecto o, para la prueba rápida, subir solo el contenido de `public_build`.
-3. Entrar a Cloudflare Pages.
-4. Crear proyecto conectado al repositorio de GitHub.
-5. Configurar:
-   - Framework preset: `None`
-   - Build command: vacío, si subes `public_build` ya generado.
-   - Output directory: `/` si el repositorio contiene solo el contenido de `public_build`.
-   - Output directory: `public_build` si subes todo este repositorio (`1208-agente/MuniMarcala`).
-6. Publicar.
+1. Entrar a Cloudflare.
+2. Ir a **Workers & Pages**.
+3. Crear aplicación desde un repositorio Git.
+4. Seleccionar `1208-agente/MuniMarcala`.
+5. Usar `main` como rama de producción.
+6. Si pide comando de despliegue, usar:
+
+```text
+npx wrangler deploy
+```
+
+El archivo raíz `wrangler.jsonc` ya indica que los archivos públicos están en `./public_build`.
 
 ### Limitaciones de esta fase
 
