@@ -126,14 +126,15 @@ async function handleApi(request, env, url) {
 async function login(request, env) {
   const { email, password } = await request.json();
   if (!email || !password) return json({ error: "Correo y contraseña son requeridos." }, 400);
+  const loginTimeout = timeout(12000, "El login tardó demasiado. Revisa políticas RLS o conexión con Supabase.");
 
   let auth;
   try {
-    auth = await supabaseAuth(env, "/auth/v1/token?grant_type=password", {
+    auth = await Promise.race([supabaseAuth(env, "/auth/v1/token?grant_type=password", {
       method: "POST",
       key: anonKey(env),
       body: { email, password },
-    });
+    }), loginTimeout]);
   } catch (error) {
     return json({ ok: false, error: error.message || "Supabase rechazó el inicio de sesión." });
   }
@@ -142,7 +143,12 @@ async function login(request, env) {
     return json({ ok: false, error: "No se pudo iniciar sesión." });
   }
 
-  let profile = await getProfileByEmail(env, auth.user.email, auth.access_token);
+  let profile;
+  try {
+    profile = await Promise.race([getProfileByEmail(env, auth.user.email, auth.access_token), loginTimeout]);
+  } catch (error) {
+    return json({ ok: false, error: error.message || "No se pudo leer el perfil interno del usuario." });
+  }
   if (!profile) return json({ ok: false, error: "El usuario existe en Supabase, pero no está habilitado en el panel municipal." });
   if (profile.status !== "active") return json({ ok: false, error: "Este usuario está pausado." });
 
@@ -479,6 +485,12 @@ function bucketName(env) {
 
 function isPlaceholder(value) {
   return !value || String(value).includes("PEGA_AQUI");
+}
+
+function timeout(ms, message) {
+  return new Promise((_, reject) => {
+    setTimeout(() => reject(new Error(message)), ms);
+  });
 }
 
 function safeHost(value) {

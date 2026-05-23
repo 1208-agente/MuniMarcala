@@ -314,7 +314,7 @@ async function api(path, options = {}) {
   const headers = {};
   if (!options.public) headers.authorization = `Bearer ${localStorage.getItem(TOKEN_KEY) || ""}`;
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 15000);
+  const timer = setTimeout(() => controller.abort(), 20000);
   let body;
   if (options.form) {
     body = options.form;
