@@ -133,16 +133,16 @@ async function login(request, env) {
       body: { email, password },
     });
   } catch (error) {
-    return json({ error: error.message || "Supabase rechazó el inicio de sesión." }, 401);
+    return json({ ok: false, error: error.message || "Supabase rechazó el inicio de sesión." });
   }
 
   if (!auth.access_token || !auth.user?.email) {
-    return json({ error: "No se pudo iniciar sesión." }, 401);
+    return json({ ok: false, error: "No se pudo iniciar sesión." });
   }
 
   let profile = await getProfileByEmail(env, auth.user.email);
-  if (!profile) return json({ error: "El usuario existe en Supabase, pero no está habilitado en el panel municipal." }, 403);
-  if (profile.status !== "active") return json({ error: "Este usuario está pausado." }, 403);
+  if (!profile) return json({ ok: false, error: "El usuario existe en Supabase, pero no está habilitado en el panel municipal." });
+  if (profile.status !== "active") return json({ ok: false, error: "Este usuario está pausado." });
 
   if (!profile.supabase_user_id) {
     const updated = await supabaseRest(env, `/rest/v1/users?email=eq.${encodeURIComponent(auth.user.email)}&select=*`, {
@@ -156,6 +156,7 @@ async function login(request, env) {
   await audit(env, profile, "login", "users", profile.id, profile.name, "Inicio de sesión en Cloudflare.");
 
   return json({
+    ok: true,
     access_token: auth.access_token,
     refresh_token: auth.refresh_token,
     expires_in: auth.expires_in,

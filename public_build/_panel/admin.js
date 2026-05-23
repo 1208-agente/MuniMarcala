@@ -187,6 +187,7 @@ async function onLogin(event) {
       },
       public: true,
     });
+    if (data.ok === false) throw new Error(data.error || "No se pudo iniciar sesión.");
     localStorage.setItem(TOKEN_KEY, data.access_token);
     showDashboard(data.user);
     await loadRows();
@@ -312,6 +313,8 @@ async function uploadFile() {
 async function api(path, options = {}) {
   const headers = {};
   if (!options.public) headers.authorization = `Bearer ${localStorage.getItem(TOKEN_KEY) || ""}`;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15000);
   let body;
   if (options.form) {
     body = options.form;
@@ -319,11 +322,20 @@ async function api(path, options = {}) {
     headers["content-type"] = "application/json";
     body = JSON.stringify(options.body);
   }
-  const response = await fetch(path, {
-    method: options.method || "GET",
-    headers,
-    body,
-  });
+  let response;
+  try {
+    response = await fetch(path, {
+      method: options.method || "GET",
+      headers,
+      body,
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error.name === "AbortError") throw new Error("La solicitud tardó demasiado. Revisa la conexión o el despliegue.");
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
   const text = await response.text();
   let data = {};
   try {
