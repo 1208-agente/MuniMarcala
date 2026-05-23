@@ -9,11 +9,6 @@
   "assets": {
     "directory": "./public_build",
     "binding": "ASSETS",
-    "run_worker_first": [
-      "/api/*",
-      "/admin",
-      "/admin/*",
-      "/participacion"
-    ]
+    "run_worker_first": true
   }
 }
