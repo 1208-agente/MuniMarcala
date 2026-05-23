@@ -1,3 +1,5 @@
+import { CONFIG } from "./config.js";
+
 const JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
   "cache-control": "no-store",
@@ -89,11 +91,11 @@ async function handleApi(request, env, url) {
 
   if (url.pathname === "/api/diagnostico" && request.method === "GET") {
     return json({
-      supabase_url_configurada: Boolean(env.SUPABASE_URL),
-      supabase_host: safeHost(env.SUPABASE_URL),
-      anon_key_configurada: Boolean(env.SUPABASE_ANON_KEY),
-      service_role_configurada: Boolean(env.SUPABASE_SERVICE_ROLE_KEY),
-      bucket: env.SUPABASE_BUCKET || "",
+      supabase_url_configurada: Boolean(configValue(env, "SUPABASE_URL")),
+      supabase_host: safeHost(configValue(env, "SUPABASE_URL")),
+      anon_key_configurada: Boolean(configValue(env, "SUPABASE_ANON_KEY")) && !isPlaceholder(configValue(env, "SUPABASE_ANON_KEY")),
+      service_role_configurada: Boolean(configValue(env, "SUPABASE_SERVICE_ROLE_KEY")),
+      bucket: configValue(env, "SUPABASE_BUCKET") || "",
     });
   }
 
@@ -105,7 +107,7 @@ async function handleApi(request, env, url) {
   }
 
   if (url.pathname === "/api/upload" && request.method === "POST") {
-    return uploadFile(request, env, user.profile);
+    return uploadFile(request, env, user.profile, user.token);
   }
 
   const match = url.pathname.match(/^\/api\/([a-z_]+)(?:\/(\d+))?$/);
@@ -114,9 +116,9 @@ async function handleApi(request, env, url) {
   const [, table, id] = match;
   if (!TABLES[table]) return json({ error: "Recurso no permitido" }, 404);
 
-  if (request.method === "GET") return listRows(env, table, url);
-  if (request.method === "POST" && !id) return createRow(request, env, table, user.profile);
-  if (request.method === "PATCH" && id) return updateRow(request, env, table, id, user.profile);
+  if (request.method === "GET") return listRows(env, table, url, user.token);
+  if (request.method === "POST" && !id) return createRow(request, env, table, user.profile, user.token);
+  if (request.method === "PATCH" && id) return updateRow(request, env, table, id, user.profile, user.token);
 
   return json({ error: "Método no permitido" }, 405);
 }
@@ -129,7 +131,7 @@ async function login(request, env) {
   try {
     auth = await supabaseAuth(env, "/auth/v1/token?grant_type=password", {
       method: "POST",
-      key: env.SUPABASE_ANON_KEY,
+      key: anonKey(env),
       body: { email, password },
     });
   } catch (error) {
@@ -140,11 +142,11 @@ async function login(request, env) {
     return json({ ok: false, error: "No se pudo iniciar sesión." });
   }
 
-  let profile = await getProfileByEmail(env, auth.user.email);
+  let profile = await getProfileByEmail(env, auth.user.email, auth.access_token);
   if (!profile) return json({ ok: false, error: "El usuario existe en Supabase, pero no está habilitado en el panel municipal." });
   if (profile.status !== "active") return json({ ok: false, error: "Este usuario está pausado." });
 
-  if (!profile.supabase_user_id) {
+  if (!profile.supabase_user_id && serviceRoleKey(env)) {
     const updated = await supabaseRest(env, `/rest/v1/users?email=eq.${encodeURIComponent(auth.user.email)}&select=*`, {
       method: "PATCH",
       body: { supabase_user_id: auth.user.id, updated_at: nowIso() },
@@ -153,7 +155,7 @@ async function login(request, env) {
     profile = updated[0] || profile;
   }
 
-  await audit(env, profile, "login", "users", profile.id, profile.name, "Inicio de sesión en Cloudflare.");
+  await audit(env, profile, "login", "users", profile.id, profile.name, "Inicio de sesión en Cloudflare.", auth.access_token);
 
   return json({
     ok: true,
@@ -171,26 +173,26 @@ async function requireAdmin(request, env) {
 
   const authUser = await supabaseAuth(env, "/auth/v1/user", {
     method: "GET",
-    key: env.SUPABASE_ANON_KEY,
+    key: anonKey(env),
     token,
   }).catch(() => null);
 
   if (!authUser?.email) return { ok: false, response: json({ error: "Sesión inválida." }, 401) };
 
-  const profile = await getProfileByEmail(env, authUser.email);
+  const profile = await getProfileByEmail(env, authUser.email, token);
   if (!profile || profile.status !== "active") {
     return { ok: false, response: json({ error: "Usuario sin permiso activo." }, 403) };
   }
 
-  return { ok: true, profile };
+  return { ok: true, profile, token };
 }
 
-async function getProfileByEmail(env, email) {
-  const rows = await supabaseRest(env, `/rest/v1/users?email=eq.${encodeURIComponent(email)}&select=*`);
+async function getProfileByEmail(env, email, token = "") {
+  const rows = await supabaseRest(env, `/rest/v1/users?email=eq.${encodeURIComponent(email)}&select=*`, { token });
   return rows[0] || null;
 }
 
-async function listRows(env, table, url) {
+async function listRows(env, table, url, token) {
   const config = TABLES[table];
   const limit = Math.min(Number(url.searchParams.get("limit") || "100"), 200);
   const params = new URLSearchParams({ select: "*", limit: String(limit) });
@@ -199,11 +201,11 @@ async function listRows(env, table, url) {
   }
   if (url.searchParams.get("status")) params.set("status", `eq.${url.searchParams.get("status")}`);
   if (url.searchParams.get("category")) params.set("category", `eq.${url.searchParams.get("category")}`);
-  const rows = await supabaseRest(env, `/rest/v1/${table}?${params.toString()}`);
+  const rows = await supabaseRest(env, `/rest/v1/${table}?${params.toString()}`, { token });
   return json({ rows });
 }
 
-async function createRow(request, env, table, user) {
+async function createRow(request, env, table, user, token) {
   const payload = cleanPayload(await request.json(), table);
   const timestamp = nowIso();
   if (table !== "settings") {
@@ -218,13 +220,14 @@ async function createRow(request, env, table, user) {
     method: "POST",
     body: payload,
     prefer: "return=representation",
+    token,
   });
   const row = rows[0];
-  await audit(env, user, "create", table, row?.id, row?.title || row?.name || row?.key || "Registro", "");
+  await audit(env, user, "create", table, row?.id, row?.title || row?.name || row?.key || "Registro", "", token);
   return json({ row }, 201);
 }
 
-async function updateRow(request, env, table, id, user) {
+async function updateRow(request, env, table, id, user, token) {
   const payload = cleanPayload(await request.json(), table);
   if (table !== "settings") {
     payload.updated_at = nowIso();
@@ -236,9 +239,10 @@ async function updateRow(request, env, table, id, user) {
     method: "PATCH",
     body: payload,
     prefer: "return=representation",
+    token,
   });
   const row = rows[0];
-  await audit(env, user, "update", table, Number(id), row?.title || row?.name || row?.key || "Registro", "");
+  await audit(env, user, "update", table, Number(id), row?.title || row?.name || row?.key || "Registro", "", token);
   return json({ row });
 }
 
@@ -258,20 +262,20 @@ function cleanPayload(payload, table) {
   return output;
 }
 
-async function uploadFile(request, env, user) {
+async function uploadFile(request, env, user, token) {
   const data = await request.formData();
   const file = data.get("file");
   const folder = sanitizeFolder(data.get("folder") || "attachments");
   if (!file || typeof file === "string") return json({ error: "Archivo requerido." }, 400);
   if (file.size > 10 * 1024 * 1024) return json({ error: "El archivo no debe superar 10 MB." }, 400);
 
-  const path = await uploadBlob(env, file, folder);
+  const path = await uploadBlob(env, file, folder, token);
 
-  await audit(env, user, "upload", "storage", null, file.name, path);
+  await audit(env, user, "upload", "storage", null, file.name, path, token);
 
   return json({
     file_path: path,
-    public_url: `${env.SUPABASE_URL}/storage/v1/object/public/${env.SUPABASE_BUCKET}/${path}`,
+    public_url: `${supabaseUrl(env)}/storage/v1/object/public/${bucketName(env)}/${path}`,
   });
 }
 
@@ -341,16 +345,17 @@ async function handlePublicCivicRequest(request, env) {
   `, 201);
 }
 
-async function uploadBlob(env, file, folder) {
+async function uploadBlob(env, file, folder, token = "") {
   const safeName = sanitizeFileName(file.name || "archivo");
   const path = `${folder}/${new Date().toISOString().slice(0, 10)}/${Date.now()}-${safeName}`;
-  const storagePath = `/storage/v1/object/${env.SUPABASE_BUCKET}/${path}`;
+  const storagePath = `/storage/v1/object/${bucketName(env)}/${path}`;
+  const authToken = token || serviceRoleKey(env) || anonKey(env);
 
-  const response = await fetch(`${env.SUPABASE_URL}${storagePath}`, {
+  const response = await fetch(`${supabaseUrl(env)}${storagePath}`, {
     method: "POST",
     headers: {
-      apikey: env.SUPABASE_SERVICE_ROLE_KEY,
-      authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
+      apikey: serviceRoleKey(env) || anonKey(env),
+      authorization: `Bearer ${authToken}`,
       "content-type": file.type || "application/octet-stream",
       "x-upsert": "true",
     },
@@ -368,8 +373,8 @@ async function uploadBlob(env, file, folder) {
 async function supabaseRest(env, path, options = {}) {
   return supabaseFetch(env, path, {
     method: options.method || "GET",
-    key: env.SUPABASE_SERVICE_ROLE_KEY,
-    token: env.SUPABASE_SERVICE_ROLE_KEY,
+    key: serviceRoleKey(env) || anonKey(env),
+    token: options.token || serviceRoleKey(env) || anonKey(env),
     body: options.body,
     prefer: options.prefer,
   });
@@ -380,8 +385,9 @@ async function supabaseAuth(env, path, options = {}) {
 }
 
 async function supabaseFetch(env, path, options = {}) {
-  if (!env.SUPABASE_URL) throw new Error("Falta SUPABASE_URL.");
-  const key = options.key || env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl(env)) throw new Error("Falta SUPABASE_URL.");
+  if (!anonKey(env) || isPlaceholder(anonKey(env))) throw new Error("Falta SUPABASE_ANON_KEY real en worker/config.js.");
+  const key = options.key || serviceRoleKey(env) || anonKey(env);
   const headers = {
     apikey: key,
     authorization: `Bearer ${options.token || key}`,
@@ -389,7 +395,7 @@ async function supabaseFetch(env, path, options = {}) {
   if (options.body) headers["content-type"] = "application/json";
   if (options.prefer) headers.prefer = options.prefer;
 
-  const response = await fetch(`${env.SUPABASE_URL}${path}`, {
+  const response = await fetch(`${supabaseUrl(env)}${path}`, {
     method: options.method || "GET",
     headers,
     body: options.body ? JSON.stringify(options.body) : undefined,
@@ -404,9 +410,10 @@ async function supabaseFetch(env, path, options = {}) {
   return data;
 }
 
-async function audit(env, user, action, entityType, entityId, title, details) {
+async function audit(env, user, action, entityType, entityId, title, details, token = "") {
   await supabaseRest(env, "/rest/v1/audit_logs", {
     method: "POST",
+    token,
     body: {
       user_id: user?.id || null,
       user_email: user?.email || "",
@@ -448,6 +455,30 @@ function sanitizeFileName(value) {
 
 function nowIso() {
   return new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+}
+
+function configValue(env, key) {
+  return env?.[key] || CONFIG[key] || "";
+}
+
+function supabaseUrl(env) {
+  return configValue(env, "SUPABASE_URL").replace(/\/+$/, "");
+}
+
+function anonKey(env) {
+  return configValue(env, "SUPABASE_ANON_KEY");
+}
+
+function serviceRoleKey(env) {
+  return configValue(env, "SUPABASE_SERVICE_ROLE_KEY");
+}
+
+function bucketName(env) {
+  return configValue(env, "SUPABASE_BUCKET") || "municipalidad-marcala";
+}
+
+function isPlaceholder(value) {
+  return !value || String(value).includes("PEGA_AQUI");
 }
 
 function safeHost(value) {
