@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel municipal | Municipalidad de Marcala</title>
+  <link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+  <main class="admin-shell">
+    <section class="login-card" data-login-panel>
+      <div>
+        <p class="eyebrow">Acceso interno</p>
+        <h1>Municipalidad de Marcala</h1>
+        <p>Ingresa con el correo y contraseña registrados en Supabase.</p>
+      </div>
+      <form data-login-form>
+        <label>Correo
+          <input type="email" name="email" autocomplete="email" required>
+        </label>
+        <label>Contraseña
+          <input type="password" name="password" autocomplete="current-password" required>
+        </label>
+        <button type="submit">Entrar al panel</button>
+        <p class="message" data-login-message></p>
+      </form>
+    </section>
+
+    <section class="dashboard" data-dashboard hidden>
+      <aside class="sidebar">
+        <a class="brand" href="/">
+          <span>M</span>
+          <strong>Marcala</strong>
+        </a>
+        <p data-user-label></p>
+        <nav data-tabs></nav>
+        <button class="ghost" type="button" data-logout>Cerrar sesión</button>
+      </aside>
+
+      <section class="workspace">
+        <header class="workspace-head">
+          <div>
+            <p class="eyebrow" data-section-kind>Contenido</p>
+            <h2 data-section-title>Actualidad municipal</h2>
+          </div>
+          <div class="actions">
+            <button type="button" data-refresh>Actualizar</button>
+            <button type="button" data-new>Nuevo</button>
+          </div>
+        </header>
+
+        <div class="notice">
+          Esta primera versión guarda cambios en Supabase. La vista pública dinámica se conectará en el siguiente bloque.
+        </div>
+
+        <div class="grid">
+          <section class="list-panel">
+            <div class="list-tools">
+              <input type="search" placeholder="Filtrar registros" data-filter>
+            </div>
+            <div class="record-list" data-record-list></div>
+          </section>
+
+          <section class="form-panel">
+            <form data-editor-form>
+              <div class="form-head">
+                <h3 data-form-title>Editar registro</h3>
+                <span data-record-id></span>
+              </div>
+              <div class="fields" data-fields></div>
+              <div class="upload-box" data-upload-box hidden>
+                <label>Subir archivo
+                  <input type="file" data-upload-file accept=".jpg,.jpeg,.png,.webp,.pdf,.docx">
+                </label>
+                <select data-upload-folder>
+                  <option value="images">Imagen</option>
+                  <option value="documents">Documento</option>
+                  <option value="attachments">Respaldo</option>
+                </select>
+                <button type="button" data-upload-button>Subir y copiar ruta</button>
+                <p data-upload-message></p>
+              </div>
+              <div class="form-actions">
+                <button type="submit">Guardar</button>
+                <a class="preview-link" href="/" target="_blank" rel="noreferrer" data-preview>Ver sitio público</a>
+              </div>
+              <p class="message" data-editor-message></p>
+            </form>
+          </section>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="/admin/admin.js"></script>
+</body>
+</html>

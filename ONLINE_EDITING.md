@@ -42,29 +42,21 @@ attachments/
 
 ## 3. Variables de entorno
 
-En el host online configurar:
+En Cloudflare configurar estas variables/secrets:
 
 ```text
-SECRET_KEY=un_valor_largo_y_seguro
-DATABASE_URL=postgresql://...
-AUTH_PROVIDER=supabase
 SUPABASE_URL=https://TU_PROYECTO.supabase.co
-SUPABASE_ANON_KEY=ey...
-SUPABASE_SERVICE_ROLE_KEY=ey...
+SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
 SUPABASE_BUCKET=municipalidad-marcala
-INITIAL_ADMIN_EMAIL=correo@municipalidad.hn
-INITIAL_ADMIN_PASSWORD=contraseña_temporal_segura
-SESSION_COOKIE_SECURE=1
 ```
 
 Notas:
 
-- `AUTH_PROVIDER=supabase` activa el login con Supabase Auth. Sin esa variable, el sistema usa el login local.
 - `SUPABASE_ANON_KEY` se usa para validar email y contraseña contra Supabase Auth.
-- `SUPABASE_SERVICE_ROLE_KEY` es secreto. No debe ir en el navegador ni en GitHub público.
-- `INITIAL_ADMIN_EMAIL` crea el perfil local del primer admin cuando la base está vacía.
-- En Supabase Auth debes crear un usuario con ese mismo correo y contraseña antes del primer login.
-- Después de entrar por primera vez, crear un administrador municipal definitivo y cambiar/pausar el temporal.
+- `SUPABASE_SERVICE_ROLE_KEY` es secreto. No debe ir en el navegador ni en GitHub público. En Cloudflare debe agregarse como secret si la interfaz lo permite.
+- `SUPABASE_BUCKET` debe coincidir exactamente con el bucket creado en Supabase Storage.
+- El usuario debe existir en **Supabase Auth > Users** y en la tabla interna `users`.
 
 ## 4. Publicar en Cloudflare
 
@@ -74,7 +66,7 @@ Sin Render/Railway/Fly, el camino correcto es:
 
 - Publicar primero `public_build` como versión pública rápida.
 - Mantener Supabase como fuente de datos y almacenamiento.
-- Crear Cloudflare Workers o Pages Functions para las acciones dinámicas:
+- Usar el Worker incluido en `worker/index.js` para las acciones dinámicas:
   - login contra Supabase Auth
   - leer y guardar contenido en Supabase PostgreSQL
   - subir archivos a Supabase Storage
@@ -86,9 +78,8 @@ GitHub queda como repositorio fuente. Cada `git push` a `main` puede disparar un
 Configuración típica:
 
 ```text
-Build command: python export_static.py
-Output directory: public_build
-Root directory: vacío, porque `app.py`, `requirements.txt` y `export_static.py` están en la raíz.
+Deploy command: npx wrangler deploy
+Root directory: vacío
 ```
 
 El repositorio actual es `1208-agente/MuniMarcala`.

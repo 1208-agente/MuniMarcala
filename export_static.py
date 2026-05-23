@@ -204,7 +204,6 @@ def write_cloudflare_files() -> None:
     )
     (BUILD_DIR / "_redirects").write_text(
         """
-/admin* / 302
 /buscar /buscar/index.html 200
 """.lstrip(),
         encoding="utf-8",
@@ -231,6 +230,8 @@ def copy_tree(source: Path, target: Path) -> None:
 
 def clear_directory(path: Path) -> None:
     for child in path.iterdir():
+        if child.name == "admin":
+            continue
         if child.is_dir():
             shutil.rmtree(child)
         else:
