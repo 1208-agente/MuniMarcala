@@ -395,7 +395,7 @@ async function supabaseFetch(env, path, options = {}) {
   });
 
   const text = await response.text();
-  const data = text ? JSON.parse(text) : {};
+  const data = parseJson(text);
   if (!response.ok) {
     const message = data.message || data.error_description || data.error || text || "Supabase error";
     throw new Error(message);
@@ -462,6 +462,15 @@ function json(payload, status = 200) {
     status,
     headers: { ...JSON_HEADERS, ...corsHeaders() },
   });
+}
+
+function parseJson(text) {
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { message: text };
+  }
 }
 
 function html(markup, status = 200) {

@@ -324,8 +324,14 @@ async function api(path, options = {}) {
     headers,
     body,
   });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.error || data.detail || "Error de solicitud.");
+  const text = await response.text();
+  let data = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    data = { error: text };
+  }
+  if (!response.ok) throw new Error(data.error || data.detail || data.message || `Error HTTP ${response.status}`);
   return data;
 }
 
