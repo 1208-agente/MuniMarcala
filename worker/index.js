@@ -62,7 +62,7 @@ export default {
 
     try {
       if (url.pathname === "/admin" || url.pathname === "/admin/" || url.pathname === "/admin/login") {
-        return env.ASSETS.fetch(new Request(new URL("/admin/index.html", url), request));
+        return env.ASSETS.fetch(new Request(new URL("/_panel/index.html", url), request));
       }
 
       if (url.pathname.startsWith("/api/")) {

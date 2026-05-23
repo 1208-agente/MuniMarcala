@@ -7,3 +7,5 @@ node_modules/**
 *.log
 wrangler.jsonc
 _redirects
+admin
+admin/**
