@@ -2,16 +2,16 @@
 
 Esta configuración convierte el sitio municipal en una aplicación editable en línea:
 
-- Flask sirve el sitio público y el panel admin.
+- Flask sirve el sitio público y el panel admin en local.
 - Supabase Auth valida correos y contraseñas del panel.
 - Supabase PostgreSQL guarda perfiles internos, roles, publicaciones, trámites, documentos, alcaldes, contactos, adjuntos y auditoría.
 - Supabase Storage guarda imágenes, PDFs, DOCX y respaldos de publicaciones.
-- Cloudflare puede manejar dominio, DNS y HTTPS, pero no ejecuta Flask por sí solo.
+- Cloudflare Pages publica la versión web. Cloudflare no ejecuta Flask por sí solo; para edición en línea sin Render se necesitan Workers/Pages Functions.
 
 ## 1. Crear Supabase
 
 1. Crear un proyecto en Supabase.
-2. Ir a **Project Settings > Database > Connection string**.
+2. Usar el botón **Connect** o **Project Settings > Database** para copiar la cadena de conexión si se necesita conectar desde herramientas externas.
 3. Copiar la conexión tipo PostgreSQL.
    - Para hosts como Render/Railway, suele convenir el **Session pooler** si el host no soporta IPv6.
    - Supabase documenta que la conexión directa usa `postgresql://...@db.<project>.supabase.co:5432/postgres`, y el pooler usa dominios `pooler.supabase.com`.
@@ -66,29 +66,32 @@ Notas:
 - En Supabase Auth debes crear un usuario con ese mismo correo y contraseña antes del primer login.
 - Después de entrar por primera vez, crear un administrador municipal definitivo y cambiar/pausar el temporal.
 
-## 4. Publicar Flask
+## 4. Publicar en Cloudflare
 
-Cloudflare Pages no ejecuta esta versión editable porque necesita Python, sesiones, base de datos y subida de archivos.
+Cloudflare Pages no ejecuta esta versión editable Flask porque necesita Python, sesiones, base de datos y subida de archivos.
 
-Usar uno de estos para ejecutar Python:
+Sin Render/Railway/Fly, el camino correcto es:
 
-- Render
-- Railway
-- Fly.io
+- Publicar primero `public_build` como versión pública rápida.
+- Mantener Supabase como fuente de datos y almacenamiento.
+- Crear Cloudflare Workers o Pages Functions para las acciones dinámicas:
+  - login contra Supabase Auth
+  - leer y guardar contenido en Supabase PostgreSQL
+  - subir archivos a Supabase Storage
+  - recibir denuncias, sugerencias y peticiones
+  - generar respuestas JSON para el panel admin
 
-GitHub queda como repositorio fuente. Cada `git push` a `main` puede disparar un nuevo despliegue en el host elegido. Cloudflare queda para dominio, DNS, HTTPS y protección.
+GitHub queda como repositorio fuente. Cada `git push` a `main` puede disparar un nuevo despliegue en Cloudflare Pages.
 
 Configuración típica:
 
 ```text
-Build command: pip install -r requirements.txt
-Start command: gunicorn app:app
-Root directory: vacío, si el repositorio es `municipio-site` y contiene `app.py` en la raíz.
+Build command: python export_static.py
+Output directory: public_build
+Root directory: vacío, porque `app.py`, `requirements.txt` y `export_static.py` están en la raíz.
 ```
 
-El repositorio actual `r92ubuntu/municipio-site` tiene `app.py` en la raíz, por eso no uses `municipalidad_marcala` como root directory.
-
-Para el repositorio actual de trabajo, usa la raíz del proyecto donde están `app.py`, `requirements.txt` y `Procfile`.
+El repositorio actual es `1208-agente/MuniMarcala`.
 
 ## 5. Login y contraseñas
 

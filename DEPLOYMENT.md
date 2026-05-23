@@ -6,10 +6,11 @@ Ruta recomendada para una versión editable de la Municipalidad de Marcala:
 
 - GitHub: repositorio del código.
 - Supabase: base de datos PostgreSQL y almacenamiento de imágenes/PDFs.
-- Render, Railway o Fly.io: servidor Python/Flask.
-- Cloudflare: dominio, DNS, CDN y protección básica.
+- Cloudflare Pages: versión pública rápida.
+- Supabase: base de datos, usuarios y almacenamiento.
+- Cloudflare Workers/Pages Functions: siguiente fase para edición en línea sin Render.
 
-Cloudflare Pages no es suficiente para esta app completa porque ejecuta sitios estáticos, no una aplicación Flask con login, base de datos y carga de archivos. Sí puede servir una versión estática de demostración pública, pero sin panel de edición.
+Cloudflare Pages no ejecuta Flask directamente. Sí puede servir una versión estática pública desde `public_build`. Para edición en línea sin Render hay que migrar las rutas dinámicas de Flask a Cloudflare Workers/Pages Functions usando Supabase.
 
 ## Fase 1: prueba pública rápida
 
@@ -20,20 +21,20 @@ Esta fase usa la carpeta generada `public_build`. No incluye panel admin en lín
 ### Generar la versión pública
 
 ```powershell
-cd D:\municipalidad_marcala_repo
+cd D:\MuniMarcala
 python export_static.py
 ```
 
 La carpeta para subir es:
 
 ```text
-D:\municipalidad_marcala_repo\public_build
+D:\MuniMarcala\public_build
 ```
 
 ### Probar localmente
 
 ```powershell
-cd D:\municipalidad_marcala_repo
+cd D:\MuniMarcala
 python -m http.server 8088 --directory public_build
 ```
 
@@ -53,7 +54,7 @@ http://127.0.0.1:8088/
    - Framework preset: `None`
    - Build command: vacío, si subes `public_build` ya generado.
    - Output directory: `/` si el repositorio contiene solo el contenido de `public_build`.
-   - Output directory: `public_build` si subes todo este repositorio (`municipio-site`).
+   - Output directory: `public_build` si subes todo este repositorio (`1208-agente/MuniMarcala`).
 6. Publicar.
 
 ### Limitaciones de esta fase
@@ -63,16 +64,16 @@ http://127.0.0.1:8088/
 - Los PDFs e imágenes quedan como archivos estáticos.
 - `/admin` se redirige al inicio en la versión pública.
 
-## Fase 2: prueba editable
+## Fase 2: prueba editable sin Render
 
 Objetivo: que el panel admin funcione en la web.
 
-Esta fase ya está preparada en el código. Ver detalles en `ONLINE_EDITING.md`.
+Esta fase requiere reemplazar las rutas dinámicas de Flask por funciones de Cloudflare. Ver detalles en `ONLINE_EDITING.md`.
 
 1. Crear proyecto en Supabase.
 2. Crear base PostgreSQL.
 3. Crear bucket público para imágenes y documentos.
-4. Publicar Flask en Render/Railway/Fly.
+4. Crear funciones Cloudflare para login, administración, cargas y formularios públicos.
 5. Configurar variables de entorno:
 
 ```text
