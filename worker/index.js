@@ -87,6 +87,16 @@ async function handleApi(request, env, url) {
     return login(request, env);
   }
 
+  if (url.pathname === "/api/diagnostico" && request.method === "GET") {
+    return json({
+      supabase_url_configurada: Boolean(env.SUPABASE_URL),
+      supabase_host: safeHost(env.SUPABASE_URL),
+      anon_key_configurada: Boolean(env.SUPABASE_ANON_KEY),
+      service_role_configurada: Boolean(env.SUPABASE_SERVICE_ROLE_KEY),
+      bucket: env.SUPABASE_BUCKET || "",
+    });
+  }
+
   const user = await requireAdmin(request, env);
   if (!user.ok) return user.response;
 
@@ -115,11 +125,16 @@ async function login(request, env) {
   const { email, password } = await request.json();
   if (!email || !password) return json({ error: "Correo y contraseña son requeridos." }, 400);
 
-  const auth = await supabaseAuth(env, "/auth/v1/token?grant_type=password", {
-    method: "POST",
-    key: env.SUPABASE_ANON_KEY,
-    body: { email, password },
-  });
+  let auth;
+  try {
+    auth = await supabaseAuth(env, "/auth/v1/token?grant_type=password", {
+      method: "POST",
+      key: env.SUPABASE_ANON_KEY,
+      body: { email, password },
+    });
+  } catch (error) {
+    return json({ error: error.message || "Supabase rechazó el inicio de sesión." }, 401);
+  }
 
   if (!auth.access_token || !auth.user?.email) {
     return json({ error: "No se pudo iniciar sesión." }, 401);
@@ -432,6 +447,14 @@ function sanitizeFileName(value) {
 
 function nowIso() {
   return new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+}
+
+function safeHost(value) {
+  try {
+    return value ? new URL(value).host : "";
+  } catch {
+    return "URL inválida";
+  }
 }
 
 function json(payload, status = 200) {
