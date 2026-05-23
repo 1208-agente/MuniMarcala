@@ -10,3 +10,10 @@ server.out.log
 server.err.log
 static-server.out.log
 static-server.err.log
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
