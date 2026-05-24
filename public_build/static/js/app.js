@@ -19,7 +19,11 @@ if (navToggle && nav) {
     document.body.classList.add("nav-open");
     navToggle.setAttribute("aria-expanded", "true");
     if (navClose) {
-      navClose.focus({ preventScroll: true });
+      try {
+        navClose.focus({ preventScroll: true });
+      } catch {
+        navClose.focus();
+      }
     }
   };
 
