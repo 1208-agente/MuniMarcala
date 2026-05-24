@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Sitio oficial de la Municipalidad de Marcala con trámites, actualidad, transparencia y servicios.">
   <title>Municipalidad | Municipalidad de Marcala</title>
-  <link rel="stylesheet" href="/static/css/styles.css?v=20260524-menu-reset1">
+  <link rel="stylesheet" href="/static/css/styles.css?v=20260524-mobile-panel2">
 </head>
 <body>
   <div class="top-strip">
@@ -20,35 +20,14 @@
         <small>Marcala, La Paz</small>
       </span>
     </a>
-    <button class="nav-toggle" type="button" aria-label="Abrir menú" aria-controls="site-menu" aria-expanded="false" data-nav-toggle>
+    <button class="nav-toggle" type="button" aria-label="Abrir menú" aria-controls="mobile-menu" aria-expanded="false" data-nav-toggle>
       <span></span><span></span><span></span>
     </button>
     <form class="header-search" action="/buscar" method="get" role="search">
       <input type="search" name="q" placeholder="Buscar" aria-label="Buscar en el sitio">
       <button type="submit">Buscar</button>
     </form>
-    <nav class="main-nav" id="site-menu" aria-label="Navegación principal" aria-modal="true" data-nav>
-      <div class="mobile-nav-head">
-        <strong>Menú</strong>
-        <button type="button" aria-label="Cerrar menú" data-nav-close>×</button>
-      </div>
-      <form class="mobile-nav-search" action="/buscar" method="get" role="search">
-        <input type="search" name="q" placeholder="Buscar en el sitio" aria-label="Buscar en el sitio">
-        <button type="submit">Buscar</button>
-      </form>
-      <div class="mobile-link-list">
-        <a href="/">Inicio</a>
-        <a href="/tramites">Trámites</a>
-        <a href="/actualidad">Actualidad municipal</a>
-        <a href="/agenda">Agenda municipal</a>
-        <a href="/transparencia">Transparencia</a>
-        <a href="/municipalidad">Historia y autoridades</a>
-        <a href="/municipalidad#autoridades">Corporación municipal</a>
-        <a href="/municipalidad#alcaldes">Historial de alcaldes</a>
-        <a href="/contactos">Contactos municipales</a>
-        <a href="/participacion">Denuncias y peticiones</a>
-        <a href="/privacidad">Privacidad</a>
-      </div>
+    <nav class="main-nav" id="site-menu" aria-label="Navegación principal" data-nav>
       <a href="/">Inicio</a>
       <a href="/tramites">Trámites</a>
       <details class="nav-dropdown">
@@ -85,10 +64,32 @@
       </details>
     </nav>
   </header>
-  <div class="nav-scrim" data-nav-scrim></div>
+  <section class="mobile-menu-panel" id="mobile-menu" aria-label="Menú móvil" data-mobile-menu hidden>
+    <div class="mobile-menu-head">
+      <strong>Menú</strong>
+      <button type="button" aria-label="Cerrar menú" data-nav-close>×</button>
+    </div>
+    <form class="mobile-menu-search" action="/buscar" method="get" role="search">
+      <input type="search" name="q" placeholder="Buscar en el sitio" aria-label="Buscar en el sitio">
+      <button type="submit">Buscar</button>
+    </form>
+    <nav class="mobile-menu-links" aria-label="Secciones del sitio">
+      <a href="/">Inicio</a>
+      <a href="/tramites">Trámites</a>
+      <a href="/actualidad">Actualidad municipal</a>
+      <a href="/agenda">Agenda municipal</a>
+      <a href="/transparencia">Transparencia</a>
+      <a href="/municipalidad">Historia y autoridades</a>
+      <a href="/municipalidad#autoridades">Corporación municipal</a>
+      <a href="/municipalidad#alcaldes">Historial de alcaldes</a>
+      <a href="/contactos">Contactos municipales</a>
+      <a href="/participacion">Denuncias y peticiones</a>
+      <a href="/privacidad">Privacidad</a>
+    </nav>
+  </section>
 
   <main>
-    
+
 <section class="page-hero compact">
   <p class="eyebrow">Municipalidad</p>
   <h1>Historia de Marcala</h1>
@@ -103,15 +104,15 @@
     <a class="admin-button secondary" href="/contactos">Ver contactos municipales</a>
   </div>
   <div class="people-grid">
-    
+
     <a class="person-card" href="/municipalidad/autoridades/miembro-corporacion-municipal">
-      
+
       <span>Regiduría municipal</span>
       <h3>Miembro de la corporación municipal</h3>
       <p>Corporación Municipal</p>
       <small>2026-2030</small>
     </a>
-    
+
   </div>
 </section>
 <section class="section split-band" id="alcaldes">
@@ -122,33 +123,45 @@
     </div>
   </div>
   <div class="people-grid">
-    
+
     <a class="person-card " href="/municipalidad/alcaldes/autoridad-municipal-actual">
       <img src="/uploads/images/20260522154017-WhatsApp_Image_2026-05-22_at_9.32.07_AM.jpeg" alt="Carmen Georgina Bautista Claros">
       <span>2026</span>
       <h3>Carmen Georgina Bautista Claros</h3>
-      <p>Carmen Georgina Bautista Claros es una líder política hondureña y actual alcaldesa del municipio de Marcala, en el departamento de La Paz, para el período constitucional 2026-2030. Su ascenso a la titularidad de la corporación municipal marca un hito en la representación femenina de la región y consolida su liderazgo dentro del Partido Nacional de Honduras.
-
-Trayectoria Política y Elección
-Afiliada al Partido Nacional, Bautista Claros construyó su camino hacia la alcaldía mediante un fuerte trabajo comunitario y una campaña enfocada en las necesidades estructurales de Marcala. Tras resultar electa en los comicios generales, asumió oficialmente su cargo en enero de 2026, sucediendo a las administraciones anteriores con la promesa de una gestión transparente y orientada al desarrollo local.
-
-Ejes de Gestión y Visión
-Desde el inicio de su mandato en 2026, su plan de gobierno se ha centrado en dinamizar la economía de Marcala, una región clave por su alta producción de café de calidad internacional. Entre sus prioridades principales destacan:
-
--Infraestructura Vial: El mejoramiento y pavimentación de las carreteras y accesos rurales para facilitar el comercio.
--Apoyo Social: La implementación de programas de asistencia para sectores vulnerables del municipio.
--Fortalecimiento Institucional: La modernización de los servicios municipales para los ciudadanos.
-
+      <p>Carmen Georgina Bautista Claros es una líder política hondureña y actual alcaldesa del municipio de Marcala, en el departamento de La Paz, para el período constitucional 2026-2030. Su ascenso a la titularidad de la corporación municipal marca un hito en la representación femenina de la región y consolida su liderazgo dentro del Partido Nacional de Honduras.
+
+
+
+Trayectoria Política y Elección
+
+Afiliada al Partido Nacional, Bautista Claros construyó su camino hacia la alcaldía mediante un fuerte trabajo comunitario y una campaña enfocada en las necesidades estructurales de Marcala. Tras resultar electa en los comicios generales, asumió oficialmente su cargo en enero de 2026, sucediendo a las administraciones anteriores con la promesa de una gestión transparente y orientada al desarrollo local.
+
+
+
+Ejes de Gestión y Visión
+
+Desde el inicio de su mandato en 2026, su plan de gobierno se ha centrado en dinamizar la economía de Marcala, una región clave por su alta producción de café de calidad internacional. Entre sus prioridades principales destacan:
+
+
+
+-Infraestructura Vial: El mejoramiento y pavimentación de las carreteras y accesos rurales para facilitar el comercio.
+
+-Apoyo Social: La implementación de programas de asistencia para sectores vulnerables del municipio.
+
+-Fortalecimiento Institucional: La modernización de los servicios municipales para los ciudadanos.
+
+
+
 Como una de las pocas mujeres al frente de una alcaldía en el departamento de La Paz en el ciclo actual, Carmen Bautista es una figura clave en la política local, enfocada en transformar a Marcala en un municipio más próspero y conectado.</p>
     </a>
-    
+
     <a class="person-card " href="/municipalidad/alcaldes/www-google-com">
       <img src="/uploads/images/20260522151216-apps.37393.13876487648548738.cbdadb4c-8335-4699-876e-68e010df4b84.jpeg" alt="yo no sé">
       <span>2000 - 2004</span>
       <h3>yo no sé</h3>
       <p>asdasd  asdasdhfdhasd fdfgd dfhdfhdfh</p>
     </a>
-    
+
   </div>
 </section>
 
@@ -175,20 +188,20 @@ Como una de las pocas mujeres al frente de una alcaldía en el departamento de L
       <a href="/participacion">Participación</a>
     </div>
     <div class="footer-tags">
-      
+
       <a href="/buscar?tag=comunidad">#comunidad</a>
-      
+
       <a href="/buscar?tag=municipalidad">#municipalidad</a>
-      
+
       <a href="/buscar?tag=agenda">#agenda</a>
-      
+
       <a href="/buscar?tag=ambiente">#ambiente</a>
-      
+
       <a href="/buscar?tag=atencion">#atencion</a>
-      
+
     </div>
   </footer>
 
-  <script src="/static/js/app.js?v=20260524-menu-reset1"></script>
+  <script src="/static/js/app.js?v=20260524-mobile-panel2"></script>
 </body>
 </html>

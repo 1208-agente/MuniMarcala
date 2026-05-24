@@ -118,9 +118,7 @@ img {
   margin-left: auto;
 }
 
-.mobile-nav-head,
-.mobile-nav-search,
-.mobile-link-list,
+.mobile-menu-panel,
 .mobile-bottom-nav,
 .nav-scrim {
   display: none;
@@ -1376,35 +1374,29 @@ button {
   }
 
   .main-nav {
+    display: none;
+  }
+
+  .mobile-menu-panel {
     position: fixed;
     inset: 0;
     z-index: 2147483000;
-    display: none;
-    align-content: start;
-    width: auto;
-    height: auto;
+    display: block;
+    width: 100%;
     min-height: 100vh;
-    margin: 0;
-    border: 0;
-    border-radius: 0;
+    min-height: 100dvh;
     background: var(--surface);
-    box-shadow: none;
+    color: var(--ink);
     overflow-y: auto;
-    padding: .85rem;
-    transform: none;
+    padding: .9rem;
     -webkit-overflow-scrolling: touch;
   }
 
-  .main-nav.open,
-  body.nav-open .main-nav {
-    display: grid;
+  .mobile-menu-panel[hidden] {
+    display: none;
   }
 
-  .nav-scrim {
-    display: none !important;
-  }
-
-  .mobile-nav-head {
+  .mobile-menu-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1414,11 +1406,11 @@ button {
     padding-bottom: .75rem;
   }
 
-  .mobile-nav-head strong {
+  .mobile-menu-head strong {
     font-size: 1.1rem;
   }
 
-  .mobile-nav-head button {
+  .mobile-menu-head button {
     display: grid;
     width: 44px;
     height: 44px;
@@ -1432,14 +1424,14 @@ button {
     line-height: 1;
   }
 
-  .mobile-nav-search {
+  .mobile-menu-search {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: .45rem;
     margin-bottom: .7rem;
   }
 
-  .mobile-nav-search input {
+  .mobile-menu-search input {
     width: 100%;
     min-height: 46px;
     border: 1px solid var(--line);
@@ -1447,7 +1439,7 @@ button {
     padding: .72rem .85rem;
   }
 
-  .mobile-nav-search button {
+  .mobile-menu-search button {
     min-height: 46px;
     border: 0;
     border-radius: 999px;
@@ -1457,12 +1449,12 @@ button {
     padding: .72rem .95rem;
   }
 
-  .mobile-link-list {
+  .mobile-menu-links {
     display: grid;
     gap: .25rem;
   }
 
-  .mobile-link-list a {
+  .mobile-menu-links a {
     display: flex;
     align-items: center;
     min-height: 50px;
@@ -1474,56 +1466,9 @@ button {
     text-decoration: none;
   }
 
-  .mobile-link-list a:hover {
+  .mobile-menu-links a:hover {
     background: var(--teal);
     color: var(--green);
-  }
-
-  .main-nav > a,
-  .nav-dropdown summary {
-    min-height: 50px;
-    border-radius: 8px;
-    color: var(--ink);
-    padding: .85rem .9rem;
-  }
-
-  .main-nav > a {
-    display: none;
-  }
-
-  .nav-dropdown {
-    display: none;
-  }
-
-  .nav-dropdown summary {
-    width: 100%;
-    justify-content: space-between;
-    color: var(--green);
-    font-size: .86rem;
-    text-transform: uppercase;
-  }
-
-  .nav-dropdown summary::after {
-    display: none;
-  }
-
-  .nav-dropdown div {
-    position: static;
-    display: grid !important;
-    min-width: 0;
-    border: 0;
-    border-left: 3px solid var(--teal);
-    box-shadow: none;
-    margin: 0 0 .55rem .6rem;
-    padding: 0 0 .25rem .45rem;
-  }
-
-  .nav-dropdown div a {
-    display: block;
-    min-height: 44px;
-    border-radius: 8px;
-    padding: .72rem .85rem;
-    white-space: normal;
   }
 
   .nav-toggle {
