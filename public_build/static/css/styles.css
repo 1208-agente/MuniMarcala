@@ -475,26 +475,27 @@ button {
 }
 
 .topic-section {
-  padding-top: 1.2rem;
-  padding-bottom: 1.2rem;
+  padding-top: .8rem;
+  padding-bottom: .8rem;
   background: #fff;
   border-bottom: 1px solid var(--line);
 }
 
 .topic-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
-  gap: .75rem;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: .55rem;
 }
 
 .topic-grid a {
-  display: grid;
-  min-height: 118px;
-  align-content: space-between;
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  gap: .55rem;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fff;
-  padding: .95rem;
+  padding: .65rem .75rem;
   text-decoration: none;
 }
 
@@ -504,6 +505,7 @@ button {
 }
 
 .topic-grid span {
+  display: none;
   color: var(--wine);
   font-size: .8rem;
   font-weight: 900;
@@ -511,6 +513,7 @@ button {
 
 .topic-grid strong {
   color: var(--ink);
+  font-size: .94rem;
   line-height: 1.15;
 }
 
@@ -1601,7 +1604,7 @@ button {
   }
 
   .topic-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .admin-feed-grid {
@@ -1644,9 +1647,27 @@ button {
   .detail-grid,
   .form-grid,
   .info-strip,
-  .site-footer,
-  .topic-grid {
+  .site-footer {
     grid-template-columns: 1fr;
+  }
+
+  .topic-section {
+    padding: .65rem .75rem;
+  }
+
+  .topic-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .45rem;
+  }
+
+  .topic-grid a {
+    min-height: 48px;
+    padding: .55rem .6rem;
+  }
+
+  .topic-grid strong {
+    font-size: .84rem;
+    line-height: 1.12;
   }
 
   .timeline article {
