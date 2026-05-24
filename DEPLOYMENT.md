@@ -5,18 +5,16 @@ Ruta recomendada para una versión editable de la Municipalidad de Marcala:
 ## Arquitectura
 
 - GitHub: repositorio del código.
-- Supabase: base de datos PostgreSQL y almacenamiento de imágenes/PDFs.
-- Cloudflare Pages: versión pública rápida.
 - Supabase: base de datos, usuarios y almacenamiento.
-- Cloudflare Workers/Pages Functions: siguiente fase para edición en línea sin Render.
+- Cloudflare Workers con Static Assets: sitio público y panel editable sin Render.
 
-Cloudflare Pages no ejecuta Flask directamente. Sí puede servir una versión estática pública desde `public_build`. Para edición en línea sin Render hay que migrar las rutas dinámicas de Flask a Cloudflare Workers/Pages Functions usando Supabase.
+Cloudflare no ejecuta Flask directamente. La versión web usa `public_build` como assets estáticos y `worker/index.js` para login, administración y formularios públicos.
 
 ## Fase 1: prueba pública rápida
 
-Objetivo: mostrar la página a clientes o municipio sin edición en línea.
+Objetivo: mostrar la página a clientes o municipio y habilitar el primer panel editable.
 
-Esta fase usa la carpeta generada `public_build`. No incluye panel admin en línea. La búsqueda funciona con un índice JSON estático.
+Esta fase usa la carpeta generada `public_build`, el panel `/_panel` y el Worker de Cloudflare. La búsqueda pública funciona con un índice JSON estático.
 
 ### Generar la versión pública
 
@@ -59,12 +57,12 @@ npx wrangler deploy
 
 El archivo raíz `wrangler.jsonc` ya indica que los archivos públicos están en `./public_build`.
 
-### Limitaciones de esta fase
+### Alcance de esta fase
 
-- No hay panel de edición en línea.
-- Los cambios se hacen localmente en Flask/SQLite y luego se vuelve a ejecutar `python export_static.py`.
-- Los PDFs e imágenes quedan como archivos estáticos.
-- `/admin` se redirige al inicio en la versión pública.
+- `/admin` muestra un panel inicial editable.
+- Los cambios del panel se guardan en Supabase.
+- La vista pública estática aún no se regenera automáticamente desde Supabase.
+- Para actualizar secciones públicas completas todavía se usa `python export_static.py` hasta completar la fase dinámica.
 
 ## Fase 2: prueba editable sin Render
 
@@ -75,23 +73,10 @@ Esta fase requiere reemplazar las rutas dinámicas de Flask por funciones de Clo
 1. Crear proyecto en Supabase.
 2. Crear base PostgreSQL.
 3. Crear bucket público para imágenes y documentos.
-4. Crear funciones Cloudflare para login, administración, cargas y formularios públicos.
-5. Configurar variables de entorno:
-
-```text
-SECRET_KEY=
-DATABASE_URL=
-AUTH_PROVIDER=supabase
-SUPABASE_URL=
-SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-SUPABASE_BUCKET=
-INITIAL_ADMIN_EMAIL=
-INITIAL_ADMIN_PASSWORD=
-SESSION_COOKIE_SECURE=1
-```
-
-Para el primer acceso, crear también ese correo en **Supabase Auth > Users**. La contraseña real será gestionada por Supabase Auth; la tabla interna solo mantiene rol y estado del usuario.
+4. Usar el Worker incluido para login, administración, cargas y formularios públicos.
+5. Configurar Supabase desde `worker/config.js` y `public_build/_panel/config.js`.
+6. Ejecutar `supabase_policies.sql` en Supabase.
+No se requiere configurar variables en Cloudflare para la prueba actual. La contraseña real será gestionada por Supabase Auth; la tabla interna solo mantiene rol y estado del usuario.
 
 ## Fase 3: dominio y seguridad
 

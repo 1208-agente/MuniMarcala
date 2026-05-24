@@ -6,7 +6,7 @@ Esta configuración convierte el sitio municipal en una aplicación editable en 
 - Supabase Auth valida correos y contraseñas del panel.
 - Supabase PostgreSQL guarda perfiles internos, roles, publicaciones, trámites, documentos, alcaldes, contactos, adjuntos y auditoría.
 - Supabase Storage guarda imágenes, PDFs, DOCX y respaldos de publicaciones.
-- Cloudflare Pages publica la versión web. Cloudflare no ejecuta Flask por sí solo; para edición en línea sin Render se necesitan Workers/Pages Functions.
+- Cloudflare Workers con Static Assets publica la versión web. Cloudflare no ejecuta Flask por sí solo; el Worker reemplaza las rutas dinámicas necesarias para la prueba.
 
 ## 1. Crear Supabase
 
@@ -40,40 +40,38 @@ attachments/
 
 `attachments/` se usa para respaldos de artículos: PDF, DOCX o imágenes descargables.
 
-## 3. Variables de entorno
+## 3. Configuración
 
-En Cloudflare configurar estas variables/secrets:
+La versión Cloudflare queda configurada desde archivos del repositorio, sin variables obligatorias en Cloudflare:
 
 ```text
-SUPABASE_URL=https://TU_PROYECTO.supabase.co
-SUPABASE_ANON_KEY=...
-SUPABASE_SERVICE_ROLE_KEY=...
-SUPABASE_BUCKET=municipalidad-marcala
+worker/config.js
+public_build/_panel/config.js
 ```
 
 Notas:
 
-- `SUPABASE_ANON_KEY` se usa para validar email y contraseña contra Supabase Auth.
-- `SUPABASE_SERVICE_ROLE_KEY` es secreto. No debe ir en el navegador ni en GitHub público. En Cloudflare debe agregarse como secret si la interfaz lo permite.
-- `SUPABASE_BUCKET` debe coincidir exactamente con el bucket creado en Supabase Storage.
-- El usuario debe existir en **Supabase Auth > Users** y en la tabla interna `users`.
+- `SUPABASE_URL`, `SUPABASE_ANON_KEY` y `SUPABASE_BUCKET` están en esos archivos.
+- No se guarda `SUPABASE_SERVICE_ROLE_KEY` en GitHub.
+- La seguridad depende de Supabase Auth + RLS. Ejecutar `supabase_policies.sql` una vez en Supabase.
+- El usuario debe existir en **Supabase Auth > Users** y también en la tabla interna `users`.
 
 ## 4. Publicar en Cloudflare
 
-Cloudflare Pages no ejecuta esta versión editable Flask porque necesita Python, sesiones, base de datos y subida de archivos.
+Cloudflare no ejecuta esta versión editable Flask porque necesita Python, sesiones, base de datos y subida de archivos.
 
 Sin Render/Railway/Fly, el camino correcto es:
 
 - Publicar primero `public_build` como versión pública rápida.
 - Mantener Supabase como fuente de datos y almacenamiento.
 - Usar el Worker incluido en `worker/index.js` para las acciones dinámicas:
-  - login contra Supabase Auth
+  - validar sesión contra Supabase Auth
   - leer y guardar contenido en Supabase PostgreSQL
-  - subir archivos a Supabase Storage
+  - subir archivos a Supabase Storage con políticas RLS
   - recibir denuncias, sugerencias y peticiones
   - generar respuestas JSON para el panel admin
 
-GitHub queda como repositorio fuente. Cada `git push` a `main` puede disparar un nuevo despliegue en Cloudflare Pages.
+GitHub queda como repositorio fuente. Cada `git push` a `main` puede disparar un nuevo despliegue en Cloudflare.
 
 Configuración típica:
 
@@ -92,14 +90,12 @@ Cuando esté desplegado:
 https://tu-dominio/admin/login
 ```
 
-El primer usuario debe existir en dos lugares:
+Cada usuario del panel debe existir en dos lugares:
 
 1. En **Supabase Auth > Users**, con email y contraseña.
-2. En la tabla interna `users`, que la app crea automáticamente con `INITIAL_ADMIN_EMAIL` cuando la base está vacía.
+2. En la tabla interna `users`, con ese mismo email y `status='active'`.
 
 Supabase guarda y valida las contraseñas. La tabla interna `users` queda para controlar rol (`admin` o `editor`) y estado (`active`, `paused`, etc.).
-
-Cuando crees usuarios desde el panel, la app también intentará crearlos/actualizarlos en Supabase Auth usando `SUPABASE_SERVICE_ROLE_KEY`.
 
 ## 6. Contactos e importación
 

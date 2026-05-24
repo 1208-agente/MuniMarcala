@@ -179,17 +179,10 @@ async function onLogin(event) {
   const message = $("[data-login-message]");
   message.textContent = "Validando...";
   try {
-    const data = await api("/api/auth/login", {
-      method: "POST",
-      body: {
-        email: form.get("email"),
-        password: form.get("password"),
-      },
-      public: true,
-    });
-    if (data.ok === false) throw new Error(data.error || "No se pudo iniciar sesión.");
-    localStorage.setItem(TOKEN_KEY, data.access_token);
-    showDashboard(data.user);
+    const auth = await supabaseLogin(form.get("email"), form.get("password"));
+    localStorage.setItem(TOKEN_KEY, auth.access_token);
+    const profile = await api("/api/auth/me");
+    showDashboard(profile.user || { email: auth.user?.email || form.get("email"), role: "usuario" });
     await loadRows();
   } catch (error) {
     message.textContent = error.message;
@@ -344,6 +337,42 @@ async function api(path, options = {}) {
     data = { error: text };
   }
   if (!response.ok) throw new Error(data.error || data.detail || data.message || `Error HTTP ${response.status}`);
+  return data;
+}
+
+async function supabaseLogin(email, password) {
+  const config = window.MUNI_CONFIG || {};
+  if (!config.SUPABASE_URL || !config.SUPABASE_ANON_KEY) {
+    throw new Error("Falta configuración pública de Supabase.");
+  }
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15000);
+  let response;
+  try {
+    response = await fetch(`${config.SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+      method: "POST",
+      headers: {
+        apikey: config.SUPABASE_ANON_KEY,
+        authorization: `Bearer ${config.SUPABASE_ANON_KEY}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error.name === "AbortError") throw new Error("Supabase tardó demasiado en responder.");
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
+  const text = await response.text();
+  let data = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    data = { msg: text };
+  }
+  if (!response.ok) throw new Error(data.msg || data.error_description || data.error || `Error de Supabase ${response.status}`);
   return data;
 }
 
