@@ -129,6 +129,34 @@ const resources = {
       ["internal_notes", "Notas internas", "textarea"],
     ],
   },
+  audit_logs: {
+    label: "Auditoría",
+    title: "entity_title",
+    subtitle: "user_email",
+    readOnly: true,
+    exportFields: [
+      ["created_at", "Fecha"],
+      ["user_email", "Usuario"],
+      ["action", "Acción"],
+      ["entity_type", "Sección"],
+      ["entity_id", "ID contenido"],
+      ["entity_title", "Contenido"],
+      ["details", "Detalle"],
+      ["ip", "IP"],
+      ["user_agent", "Navegador"],
+    ],
+    fields: [
+      ["created_at", "Fecha"],
+      ["user_email", "Usuario"],
+      ["action", "Acción"],
+      ["entity_type", "Sección"],
+      ["entity_id", "ID contenido"],
+      ["entity_title", "Contenido"],
+      ["details", "Detalle"],
+      ["ip", "IP"],
+      ["user_agent", "Navegador"],
+    ],
+  },
 };
 
 let currentResource = "content";
@@ -141,6 +169,8 @@ const dashboard = $("[data-dashboard]");
 const tabs = $("[data-tabs]");
 const list = $("[data-record-list]");
 const fields = $("[data-fields]");
+const auditFilters = $("[data-audit-filters]");
+const exportButton = $("[data-export]");
 
 init();
 
@@ -151,8 +181,13 @@ function init() {
   $("[data-refresh]").addEventListener("click", loadRows);
   $("[data-new]").addEventListener("click", () => editRecord({}));
   $("[data-filter]").addEventListener("input", renderList);
+  $("[data-export]").addEventListener("click", exportRows);
   $("[data-logout]").addEventListener("click", logout);
   $("[data-upload-button]").addEventListener("click", uploadFile);
+  auditFilters.querySelectorAll("input, select").forEach((control) => {
+    control.addEventListener("change", loadRows);
+    control.addEventListener("input", debounce(loadRows, 350));
+  });
 
   if (localStorage.getItem(TOKEN_KEY)) {
     showDashboard();
@@ -238,10 +273,10 @@ async function loadRows() {
   const config = resources[currentResource];
   $("[data-section-title]").textContent = config.label;
   $("[data-section-kind]").textContent = currentResource;
-  $("[data-upload-box]").hidden = !config.upload;
+  syncResourceUi(config);
   list.innerHTML = "<p>Cargando...</p>";
   try {
-    const data = await api(`/api/${currentResource}`);
+    const data = await api(`/api/${currentResource}${resourceQuery()}`);
     rows = data.rows || [];
     renderList();
     editRecord(rows[0] || {});
@@ -252,12 +287,11 @@ async function loadRows() {
 
 function renderList() {
   const config = resources[currentResource];
-  const term = normalize($("[data-filter]").value || "");
-  const filtered = rows.filter((row) => normalize(JSON.stringify(row)).includes(term));
+  const filtered = filteredRows();
   list.innerHTML = filtered.map((row) => `
     <button class="record ${currentRecord?.id === row.id ? "active" : ""}" type="button" data-id="${row.id}">
-      <strong>${escapeHtml(row[config.title] || row.key || "Sin título")}</strong>
-      <span>${escapeHtml(row[config.subtitle] || row.status || row.created_at || "")}</span>
+      <strong>${escapeHtml(recordTitle(row, config))}</strong>
+      <span>${escapeHtml(recordSubtitle(row, config))}</span>
     </button>
   `).join("") || "<p>No hay registros.</p>";
   list.querySelectorAll("[data-id]").forEach((button) => {
@@ -268,9 +302,11 @@ function renderList() {
 function editRecord(record) {
   currentRecord = record || {};
   const config = resources[currentResource];
-  $("[data-form-title]").textContent = currentRecord?.id ? "Editar registro" : "Nuevo registro";
+  $("[data-form-title]").textContent = config.readOnly ? "Detalle de auditoría" : (currentRecord?.id ? "Editar registro" : "Nuevo registro");
   $("[data-record-id]").textContent = currentRecord?.id ? `ID ${currentRecord.id}` : "";
-  fields.innerHTML = config.fields.map(([name, label, type, options]) => renderField(name, label, type, options, currentRecord?.[name])).join("");
+  fields.innerHTML = config.readOnly
+    ? config.fields.map(([name, label]) => renderReadOnlyField(name, label, currentRecord?.[name])).join("")
+    : config.fields.map(([name, label, type, options]) => renderField(name, label, type, options, currentRecord?.[name])).join("");
 
   const titleField = fields.querySelector("[name='title'], [name='name']");
   const slugField = fields.querySelector("[name='slug']");
@@ -280,6 +316,16 @@ function editRecord(record) {
     });
   }
   renderList();
+}
+
+function renderReadOnlyField(name, label, value) {
+  const wide = ["details", "user_agent", "entity_title"].includes(name);
+  return `
+    <div class="readonly-field ${wide ? "field-wide" : ""}">
+      <span>${escapeHtml(label)}</span>
+      <strong>${escapeHtml(formatAuditValue(name, value)) || "Sin dato"}</strong>
+    </div>
+  `;
 }
 
 function renderField(name, label, type, options, value) {
@@ -297,6 +343,7 @@ function renderField(name, label, type, options, value) {
 
 async function onSave(event) {
   event.preventDefault();
+  if (resources[currentResource].readOnly) return;
   const message = $("[data-editor-message]");
   message.textContent = "Guardando...";
   const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
@@ -312,6 +359,99 @@ async function onSave(event) {
   } catch (error) {
     message.textContent = error.message;
   }
+}
+
+function syncResourceUi(config) {
+  $("[data-upload-box]").hidden = !config.upload || config.readOnly;
+  $("[data-new]").hidden = Boolean(config.readOnly);
+  $("[data-form-actions]").hidden = Boolean(config.readOnly);
+  exportButton.hidden = !config.readOnly;
+  auditFilters.hidden = currentResource !== "audit_logs";
+  $("[data-filter]").placeholder = config.readOnly ? "Buscar dentro del resultado" : "Filtrar registros";
+  $("[data-editor-message]").textContent = "";
+}
+
+function resourceQuery() {
+  if (currentResource !== "audit_logs") return "";
+  const params = new URLSearchParams({ limit: "200" });
+  const dateFrom = $("[data-audit-date-from]").value;
+  const dateTo = $("[data-audit-date-to]").value;
+  const action = $("[data-audit-action]").value;
+  const entity = $("[data-audit-entity]").value;
+  const user = $("[data-audit-user]").value.trim();
+  if (dateFrom) params.set("date_from", dateFrom);
+  if (dateTo) params.set("date_to", dateTo);
+  if (action) params.set("action", action);
+  if (entity) params.set("entity_type", entity);
+  if (user) params.set("user_email", user);
+  return `?${params.toString()}`;
+}
+
+function filteredRows() {
+  const term = normalize($("[data-filter]").value || "");
+  return rows.filter((row) => normalize(JSON.stringify(row)).includes(term));
+}
+
+function recordTitle(row, config) {
+  if (currentResource === "audit_logs") {
+    return `${actionLabel(row.action)} · ${row.entity_title || row.entity_type || "Registro"}`;
+  }
+  return row[config.title] || row.key || "Sin título";
+}
+
+function recordSubtitle(row, config) {
+  if (currentResource === "audit_logs") {
+    return `${formatAuditValue("created_at", row.created_at)} · ${row.user_email || "Usuario no registrado"}`;
+  }
+  return row[config.subtitle] || row.status || row.created_at || "";
+}
+
+function exportRows() {
+  const config = resources[currentResource];
+  const exportFields = config.exportFields || config.fields.map(([name, label]) => [name, label]);
+  const csvRows = [
+    exportFields.map(([, label]) => csvCell(label)).join(","),
+    ...filteredRows().map((row) => exportFields
+      .map(([name]) => csvCell(formatAuditValue(name, row[name])))
+      .join(",")),
+  ];
+  const blob = new Blob([`\ufeff${csvRows.join("\n")}`], { type: "text/csv;charset=utf-8" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `auditoria-marcala-${new Date().toISOString().slice(0, 10)}.csv`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+function csvCell(value) {
+  return `"${String(value ?? "").replace(/"/g, '""')}"`;
+}
+
+function actionLabel(value) {
+  return {
+    login: "Inicio de sesión",
+    create: "Creación",
+    update: "Actualización",
+    upload: "Carga de archivo",
+  }[value] || value || "Acción";
+}
+
+function formatAuditValue(name, value) {
+  if (value == null || value === "") return "";
+  if (name === "action") return actionLabel(value);
+  if (name === "created_at") {
+    const date = new Date(value);
+    if (!Number.isNaN(date.getTime())) return date.toLocaleString("es-HN");
+  }
+  return value;
+}
+
+function debounce(callback, wait) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => callback(...args), wait);
+  };
 }
 
 async function uploadFile() {

@@ -53,6 +53,41 @@
           <section class="list-panel">
             <div class="list-tools">
               <input type="search" placeholder="Filtrar registros" data-filter>
+              <button class="ghost" type="button" data-export hidden>Exportar CSV</button>
+            </div>
+            <div class="audit-filters" data-audit-filters hidden>
+              <label>Desde
+                <input type="date" data-audit-date-from>
+              </label>
+              <label>Hasta
+                <input type="date" data-audit-date-to>
+              </label>
+              <label>Acción
+                <select data-audit-action>
+                  <option value="">Todas</option>
+                  <option value="login">Inicio de sesión</option>
+                  <option value="create">Creación</option>
+                  <option value="update">Actualización</option>
+                  <option value="upload">Carga de archivo</option>
+                </select>
+              </label>
+              <label>Sección
+                <select data-audit-entity>
+                  <option value="">Todas</option>
+                  <option value="content">Actualidad y agenda</option>
+                  <option value="services">Trámites</option>
+                  <option value="documents">Transparencia</option>
+                  <option value="municipal_authorities">Corporación municipal</option>
+                  <option value="mayors">Historial de alcaldes</option>
+                  <option value="contacts">Contactos</option>
+                  <option value="civic_requests">Denuncias y peticiones</option>
+                  <option value="storage">Archivos</option>
+                  <option value="users">Usuarios</option>
+                </select>
+              </label>
+              <label class="field-wide">Usuario
+                <input type="search" placeholder="correo@municipalidad..." data-audit-user>
+              </label>
             </div>
             <div class="record-list" data-record-list></div>
           </section>
@@ -76,7 +111,7 @@
                 <button type="button" data-upload-button>Subir y copiar ruta</button>
                 <p data-upload-message></p>
               </div>
-              <div class="form-actions">
+              <div class="form-actions" data-form-actions>
                 <button type="submit">Guardar</button>
                 <a class="preview-link" href="/" target="_blank" rel="noreferrer" data-preview>Ver sitio público</a>
               </div>
@@ -88,7 +123,7 @@
     </section>
   </main>
 
-  <script src="/_panel/config.js?v=logout2"></script>
-  <script src="/_panel/admin.js?v=logout2"></script>
+  <script src="/_panel/config.js?v=audit1"></script>
+  <script src="/_panel/admin.js?v=audit1"></script>
 </body>
 </html>

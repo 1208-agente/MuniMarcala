@@ -56,6 +56,11 @@ const TABLES = {
     order: "key.asc",
     writable: ["key", "value"],
   },
+  audit_logs: {
+    order: "created_at.desc",
+    writable: [],
+    readOnly: true,
+  },
 };
 
 export default {
@@ -117,6 +122,7 @@ async function handleApi(request, env, url) {
   if (!TABLES[table]) return json({ error: "Recurso no permitido" }, 404);
 
   if (request.method === "GET") return listRows(env, table, url, user.token);
+  if (TABLES[table].readOnly) return json({ error: "Este recurso es solo de lectura." }, 405);
   if (request.method === "POST" && !id) return createRow(request, env, table, user.profile, user.token);
   if (request.method === "PATCH" && id) return updateRow(request, env, table, id, user.profile, user.token);
 
@@ -207,6 +213,13 @@ async function listRows(env, table, url, token) {
   }
   if (url.searchParams.get("status")) params.set("status", `eq.${url.searchParams.get("status")}`);
   if (url.searchParams.get("category")) params.set("category", `eq.${url.searchParams.get("category")}`);
+  if (table === "audit_logs") {
+    if (url.searchParams.get("action")) params.set("action", `eq.${url.searchParams.get("action")}`);
+    if (url.searchParams.get("entity_type")) params.set("entity_type", `eq.${url.searchParams.get("entity_type")}`);
+    if (url.searchParams.get("user_email")) params.set("user_email", `ilike.*${escapeFilter(url.searchParams.get("user_email"))}*`);
+    if (url.searchParams.get("date_from")) params.append("created_at", `gte.${url.searchParams.get("date_from")}T00:00:00Z`);
+    if (url.searchParams.get("date_to")) params.append("created_at", `lte.${url.searchParams.get("date_to")}T23:59:59Z`);
+  }
   const rows = await supabaseRest(env, `/rest/v1/${table}?${params.toString()}`, { token });
   return json({ rows });
 }
@@ -461,6 +474,10 @@ function sanitizeFileName(value) {
 
 function nowIso() {
   return new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+}
+
+function escapeFilter(value) {
+  return String(value || "").replace(/[%*]/g, "");
 }
 
 function configValue(env, key) {
