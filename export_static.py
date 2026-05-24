@@ -230,7 +230,7 @@ def copy_tree(source: Path, target: Path) -> None:
 
 def clear_directory(path: Path) -> None:
     for child in path.iterdir():
-        if child.name == "admin":
+        if child.name in {"admin", "_panel"}:
             continue
         if child.is_dir():
             shutil.rmtree(child)
