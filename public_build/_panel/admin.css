@@ -44,6 +44,11 @@ button:hover,
   filter: brightness(1.08);
 }
 
+button:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
 .ghost {
   background: #eef3f8;
   color: var(--blue);
@@ -51,6 +56,11 @@ button:hover,
 
 .admin-shell {
   min-height: 100vh;
+}
+
+[hidden],
+.is-hidden {
+  display: none !important;
 }
 
 .login-card {

@@ -206,14 +206,19 @@ async function onLogin(event) {
 
 function showDashboard(user = null) {
   loginPanel.hidden = true;
+  loginPanel.classList.add("is-hidden");
   dashboard.hidden = false;
+  dashboard.classList.remove("is-hidden");
   if (user) $("[data-user-label]").textContent = `${user.name} · ${user.role}`;
 }
 
 function logout() {
   localStorage.removeItem(TOKEN_KEY);
   dashboard.hidden = true;
+  dashboard.classList.add("is-hidden");
   loginPanel.hidden = false;
+  loginPanel.classList.remove("is-hidden");
+  $("[data-login-message]").textContent = "";
 }
 
 async function loadRows() {
