@@ -17,8 +17,17 @@
   box-sizing: border-box;
 }
 
+html {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   background: var(--paper);
   color: var(--ink);
   font-family: "Segoe UI", Arial, sans-serif;
@@ -1322,8 +1331,23 @@ button {
 }
 
 @media (max-width: 1050px) {
+  html,
+  body {
+    overflow-x: clip;
+  }
+
   body {
     padding-bottom: 72px;
+  }
+
+  main,
+  .top-strip,
+  .site-header,
+  .site-footer,
+  .section,
+  .topic-section {
+    max-width: 100%;
+    overflow-x: clip;
   }
 
   body.nav-open .nav-scrim {
@@ -1514,11 +1538,13 @@ button {
 
   .mobile-bottom-nav {
     position: fixed;
-    right: .75rem;
-    bottom: .75rem;
-    left: .75rem;
+    right: auto;
+    bottom: calc(.55rem + env(safe-area-inset-bottom, 0px));
+    left: 50%;
     z-index: 45;
     display: grid;
+    width: calc(100vw - 16px);
+    max-width: 430px;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: .25rem;
     border: 1px solid rgba(215, 221, 230, .92);
@@ -1527,6 +1553,7 @@ button {
     box-shadow: 0 16px 38px rgba(31, 41, 55, .2);
     padding: .42rem;
     backdrop-filter: blur(16px);
+    transform: translateX(-50%);
   }
 
   body.nav-open .mobile-bottom-nav {
@@ -1636,5 +1663,21 @@ button {
   .admin-feed-nav a,
   .admin-button {
     width: 100%;
+  }
+}
+
+@media (max-width: 380px) {
+  .mobile-bottom-nav {
+    width: calc(100vw - 10px);
+    gap: .12rem;
+    border-radius: 16px;
+    padding: .32rem;
+  }
+
+  .mobile-bottom-nav a,
+  .mobile-bottom-nav button {
+    min-height: 44px;
+    font-size: .66rem;
+    padding: .25rem .05rem;
   }
 }

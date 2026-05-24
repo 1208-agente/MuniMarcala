@@ -217,6 +217,10 @@ def write_cloudflare_files() -> None:
 node_modules
 node_modules/**
 *.log
+wrangler.jsonc
+_redirects
+admin
+admin/**
 """.lstrip(),
         encoding="utf-8",
     )
