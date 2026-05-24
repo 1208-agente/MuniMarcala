@@ -14,12 +14,12 @@
         <h1>Municipalidad de Marcala</h1>
         <p>Ingresa con el correo y contraseña registrados en Supabase.</p>
       </div>
-      <form data-login-form>
+      <form data-login-form autocomplete="off">
         <label>Correo
           <input type="email" name="email" autocomplete="email" required>
         </label>
         <label>Contraseña
-          <input type="password" name="password" autocomplete="current-password" required>
+          <input type="password" name="password" autocomplete="off" required>
         </label>
         <button type="submit">Entrar al panel</button>
         <p class="message" data-login-message></p>
@@ -88,7 +88,7 @@
     </section>
   </main>
 
-  <script src="/_panel/config.js?v=workerlogin1"></script>
-  <script src="/_panel/admin.js?v=workerlogin1"></script>
+  <script src="/_panel/config.js?v=logout1"></script>
+  <script src="/_panel/admin.js?v=logout1"></script>
 </body>
 </html>

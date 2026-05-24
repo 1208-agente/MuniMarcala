@@ -193,6 +193,7 @@ async function onLogin(event) {
     if (!data.access_token) throw new Error("Supabase no devolvió una sesión válida.");
     message.textContent = "Abriendo panel...";
     localStorage.setItem(TOKEN_KEY, data.access_token);
+    event.currentTarget.reset();
     showDashboard(data.user || { email: form.get("email"), role: "usuario" });
     loadRows().catch((error) => {
       $("[data-record-list]").innerHTML = `<p class="message">${escapeHtml(error.message)}</p>`;
@@ -218,6 +219,8 @@ function logout() {
   dashboard.classList.add("is-hidden");
   loginPanel.hidden = false;
   loginPanel.classList.remove("is-hidden");
+  const loginForm = $("[data-login-form]");
+  if (loginForm) loginForm.reset();
   $("[data-login-message]").textContent = "";
 }
 
