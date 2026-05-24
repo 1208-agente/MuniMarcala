@@ -64,7 +64,7 @@ img {
 }
 
 .site-header {
-  position: sticky;
+  position: relative;
   top: 0;
   z-index: 80;
   display: flex;
@@ -74,6 +74,7 @@ img {
   background: rgba(255, 255, 255, .96);
   border-bottom: 1px solid var(--line);
   box-shadow: 0 10px 24px rgba(31, 41, 55, .06);
+  -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
 }
 
@@ -467,6 +468,7 @@ button {
   font-weight: 900;
   padding: 1rem;
   text-decoration: none;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 
@@ -1336,7 +1338,7 @@ button {
 @media (max-width: 1050px) {
   html,
   body {
-    overflow-x: clip;
+    overflow-x: hidden;
   }
 
   body {
@@ -1350,7 +1352,7 @@ button {
   .section,
   .topic-section {
     max-width: 100%;
-    overflow-x: clip;
+    overflow-x: hidden;
   }
 
   body.nav-open .nav-scrim {
@@ -1385,6 +1387,7 @@ button {
     display: grid;
     align-content: start;
     width: 100vw;
+    height: 100vh;
     height: 100dvh;
     margin: 0;
     border: 0;
@@ -1406,6 +1409,7 @@ button {
     inset: 0;
     z-index: 60;
     background: rgba(15, 23, 42, .42);
+    -webkit-backdrop-filter: blur(2px);
     backdrop-filter: blur(2px);
   }
 
@@ -1542,6 +1546,7 @@ button {
   .mobile-bottom-nav {
     position: fixed;
     right: auto;
+    bottom: .55rem;
     bottom: calc(.55rem + env(safe-area-inset-bottom, 0px));
     left: 50%;
     z-index: 45;
@@ -1555,6 +1560,7 @@ button {
     background: rgba(255, 255, 255, .96);
     box-shadow: 0 16px 38px rgba(31, 41, 55, .2);
     padding: .42rem;
+    -webkit-backdrop-filter: blur(16px);
     backdrop-filter: blur(16px);
     transform: translateX(-50%);
   }

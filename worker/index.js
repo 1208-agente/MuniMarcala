@@ -156,7 +156,7 @@ async function login(request, env) {
       body: { email, password },
     }), loginTimeout]);
   } catch (error) {
-    return json({ ok: false, error: error.message || "Supabase rechazó el inicio de sesión." });
+    return json({ ok: false, error: humanError(error, "login") });
   }
 
   if (!auth.access_token || !auth.user?.email) {
@@ -167,7 +167,7 @@ async function login(request, env) {
   try {
     profile = await Promise.race([getProfileByEmail(env, auth.user.email, auth.access_token), loginTimeout]);
   } catch (error) {
-    return json({ ok: false, error: error.message || "No se pudo leer el perfil interno del usuario." });
+    return json({ ok: false, error: humanError(error, "profile") });
   }
   if (!profile) return json({ ok: false, error: "El usuario existe en Supabase, pero no está habilitado en el panel municipal." });
   if (profile.status !== "active") return json({ ok: false, error: "Este usuario está pausado." });
@@ -556,6 +556,27 @@ function timeout(ms, message) {
   return new Promise((_, reject) => {
     setTimeout(() => reject(new Error(message)), ms);
   });
+}
+
+function humanError(error, context = "") {
+  const message = String(error?.message || error || "");
+  const lower = message.toLowerCase();
+  if (context === "login" || lower.includes("invalid login") || lower.includes("invalid credentials")) {
+    return "Correo o contraseña incorrectos.";
+  }
+  if (lower.includes("jwt") || lower.includes("session")) {
+    return "La sesión venció. Vuelve a iniciar sesión.";
+  }
+  if (lower.includes("rls") || lower.includes("permission") || lower.includes("not authorized")) {
+    return "Tu usuario no tiene permiso para realizar esta acción.";
+  }
+  if (lower.includes("timeout") || lower.includes("tardó demasiado")) {
+    return "La conexión tardó demasiado. Intenta nuevamente.";
+  }
+  if (context === "profile") {
+    return "No se pudo validar el usuario interno. Revisa que esté activo en el panel.";
+  }
+  return "No se pudo completar la acción. Intenta nuevamente.";
 }
 
 function safeHost(value) {

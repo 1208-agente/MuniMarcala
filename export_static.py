@@ -31,6 +31,7 @@ def main() -> None:
 
     write_search_index()
     write_static_search_js()
+    write_panel_seed_data()
     write_cloudflare_files()
     print(f"Static public site exported to: {BUILD_DIR}")
 
@@ -158,6 +159,22 @@ async function runStaticSearch() {
 runStaticSearch();
 """.strip()
         + "\n",
+        encoding="utf-8",
+    )
+
+
+def write_panel_seed_data() -> None:
+    tables = ["content", "services", "documents", "mayors", "municipal_authorities", "contacts"]
+    seed: dict[str, list[dict[str, str]]] = {}
+    for table in tables:
+        seed[table] = [dict(row) for row in query_all(f"SELECT * FROM {table} ORDER BY id")]
+
+    panel_dir = BUILD_DIR / "_panel"
+    panel_dir.mkdir(parents=True, exist_ok=True)
+    (panel_dir / "seed-data.js").write_text(
+        "window.MUNI_SEED_DATA = "
+        + json.dumps(seed, ensure_ascii=False, indent=2)
+        + ";\n",
         encoding="utf-8",
     )
 

@@ -60,6 +60,14 @@ if (navToggle && nav) {
     }
   });
 
+  window.addEventListener("scroll", () => {
+    if (!document.body.classList.contains("nav-open")) {
+      document.querySelectorAll(".nav-dropdown[open]").forEach((dropdown) => {
+        dropdown.removeAttribute("open");
+      });
+    }
+  }, { passive: true });
+
   nav.addEventListener("click", (event) => {
     event.stopPropagation();
     if (event.target.closest("a")) {

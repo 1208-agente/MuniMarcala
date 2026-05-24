@@ -9,18 +9,18 @@ const resources = {
     fields: [
       ["kind", "Tipo", "select", ["actualidad", "agenda"]],
       ["status", "Estado", "select", ["draft", "published", "archived"]],
-      ["title", "Título", "text"],
-      ["slug", "Enlace interno", "text"],
-      ["category", "Categoría", "text"],
+      ["title", "Título", "text", null, "Nombre público de la publicación."],
+      ["slug", "Enlace interno", "text", null, "Se genera con el título. Usa letras, números y guiones."],
+      ["category", "Categoría", "select", ["noticias", "comunicados", "avisos", "obras-y-proyectos", "campanas", "agenda"], "Define dónde se agrupa dentro de Actualidad o Agenda."],
       ["published_at", "Fecha de publicación", "date"],
       ["event_date", "Fecha de evento", "datetime-local"],
-      ["summary", "Resumen", "textarea"],
-      ["body", "Contenido", "textarea"],
-      ["image_path", "Ruta de imagen", "text"],
-      ["image_alt", "Texto alternativo", "text"],
-      ["tags", "Etiquetas", "text"],
-      ["cta_label", "Texto del botón", "text"],
-      ["cta_url", "Enlace del botón", "url"],
+      ["summary", "Resumen", "textarea", null, "Texto corto para tarjetas y listados."],
+      ["body", "Contenido", "textarea", null, "Contenido completo que verá la ciudadanía."],
+      ["image_path", "Ruta de imagen", "text", null, "Sube una imagen y pega aquí la ruta generada."],
+      ["image_alt", "Texto alternativo", "text", null, "Describe la imagen para accesibilidad."],
+      ["tags", "Etiquetas", "text", null, "Palabras separadas por coma para búsqueda interna."],
+      ["cta_label", "Texto del botón", "text", null, "Opcional. Ejemplo: Ver requisitos."],
+      ["cta_url", "Enlace del botón", "url", null, "Opcional. URL interna o externa."],
     ],
   },
   services: {
@@ -29,12 +29,12 @@ const resources = {
     subtitle: "department",
     fields: [
       ["status", "Estado", "select", ["draft", "published", "archived"]],
-      ["title", "Título", "text"],
-      ["slug", "Enlace interno", "text"],
-      ["department", "Departamento", "text"],
-      ["summary", "Resumen", "textarea"],
-      ["requirements", "Requisitos", "textarea"],
-      ["steps", "Pasos", "textarea"],
+      ["title", "Título", "text", null, "Nombre del trámite."],
+      ["slug", "Enlace interno", "text", null, "Ruta corta de la ficha pública."],
+      ["department", "Departamento", "select", ["Secretaría Municipal", "Tesorería Municipal", "Catastro", "Servicios Públicos", "Alcaldía", "Transparencia", "Atención Ciudadana"]],
+      ["summary", "Resumen", "textarea", null, "Descripción corta del trámite."],
+      ["requirements", "Requisitos", "textarea", null, "Lista de documentos o condiciones necesarias."],
+      ["steps", "Pasos", "textarea", null, "Pasos claros para realizar el trámite."],
       ["cost", "Costo", "text"],
       ["estimated_time", "Tiempo estimado", "text"],
       ["schedule", "Horario", "text"],
@@ -53,7 +53,7 @@ const resources = {
       ["status", "Estado", "select", ["draft", "published", "archived"]],
       ["title", "Título", "text"],
       ["slug", "Enlace interno", "text"],
-      ["category", "Categoría", "text"],
+      ["category", "Categoría", "select", ["presupuesto", "rendicion-de-cuentas", "actas", "licitaciones", "ordenanzas", "compras", "informes", "otros"]],
       ["document_date", "Fecha del documento", "date"],
       ["year", "Año", "number"],
       ["department", "Departamento", "text"],
@@ -73,7 +73,7 @@ const resources = {
       ["name", "Nombre", "text"],
       ["slug", "Enlace interno", "text"],
       ["position", "Cargo", "text"],
-      ["area", "Área", "text"],
+      ["area", "Área", "select", ["Corporación Municipal", "Alcaldía", "Vicealcaldía", "Regiduría", "Administración", "Servicios Municipales"]],
       ["period", "Periodo", "text"],
       ["phone", "Teléfono", "tel"],
       ["email", "Correo", "email"],
@@ -109,7 +109,7 @@ const resources = {
       ["status", "Estado", "select", ["draft", "published", "archived"]],
       ["name", "Nombre", "text"],
       ["slug", "Enlace interno", "text"],
-      ["area", "Área", "text"],
+      ["area", "Área", "select", ["Alcaldía", "Secretaría Municipal", "Tesorería", "Catastro", "Servicios Públicos", "Atención Ciudadana", "Transparencia"]],
       ["position", "Cargo", "text"],
       ["phone", "Teléfono", "tel"],
       ["email", "Correo", "email"],
@@ -263,10 +263,10 @@ async function onLogin(event) {
     clearLoginForm(loginForm);
     showDashboard(data.user || { email: form.get("email"), role: "usuario" });
     loadRows().catch((error) => {
-      $("[data-record-list]").innerHTML = `<p class="message">${escapeHtml(error.message)}</p>`;
+      $("[data-record-list]").innerHTML = `<p class="message">${escapeHtml(humanMessage(error))}</p>`;
     });
   } catch (error) {
-    message.textContent = error.message;
+    message.textContent = humanMessage(error);
   } finally {
     if (submitButton) submitButton.disabled = false;
   }
@@ -308,7 +308,7 @@ async function loadRows(options = {}) {
   list.innerHTML = "<p>Cargando...</p>";
   try {
     const data = await api(`/api/${currentResource}${resourceQuery()}`);
-    rows = data.rows || [];
+    rows = mergeSeedRows(currentResource, data.rows || []);
     renderList();
     updateListSummary();
     const openKey = options.openKey || null;
@@ -320,7 +320,7 @@ async function loadRows(options = {}) {
       showListMode();
     }
   } catch (error) {
-    list.innerHTML = `<p class="message">${error.message}</p>`;
+    list.innerHTML = `<p class="message">${escapeHtml(humanMessage(error))}</p>`;
   }
 }
 
@@ -346,7 +346,7 @@ function editRecord(record) {
   $("[data-record-id]").textContent = recordKey(currentRecord) ? `ID ${recordKey(currentRecord)}` : "";
   fields.innerHTML = config.readOnly
     ? config.fields.map(([name, label]) => renderReadOnlyField(name, label, currentRecord?.[name])).join("")
-    : config.fields.map(([name, label, type, options]) => renderField(name, label, type, options, currentRecord?.[name])).join("");
+    : config.fields.map(([name, label, type, options, help]) => renderField(name, label, type, options, currentRecord?.[name], help)).join("");
 
   const titleField = fields.querySelector("[name='title'], [name='name']");
   const slugField = fields.querySelector("[name='slug']");
@@ -369,17 +369,18 @@ function renderReadOnlyField(name, label, value) {
   `;
 }
 
-function renderField(name, label, type, options, value) {
+function renderField(name, label, type, options, value, help = "") {
   const wide = ["summary", "body", "requirements", "steps", "description", "biography", "bio", "internal_notes"].includes(name);
+  const hint = help ? `<small>${escapeHtml(help)}</small>` : "";
   if (type === "textarea") {
-    return `<label class="${wide ? "field-wide" : ""}">${label}<textarea name="${name}">${escapeHtml(value || "")}</textarea></label>`;
+    return `<label class="${wide ? "field-wide" : ""}">${label}${hint}<textarea name="${name}">${escapeHtml(value || "")}</textarea></label>`;
   }
   if (type === "select") {
-    return `<label>${label}<select name="${name}">${options.map((option) => `
+    return `<label>${label}${hint}<select name="${name}">${options.map((option) => `
       <option value="${option}" ${String(value || "") === option ? "selected" : ""}>${option}</option>
     `).join("")}</select></label>`;
   }
-  return `<label class="${wide ? "field-wide" : ""}">${label}<input name="${name}" type="${type}" value="${escapeHtml(value ?? "")}"></label>`;
+  return `<label class="${wide ? "field-wide" : ""}">${label}${hint}<input name="${name}" type="${type}" value="${escapeHtml(value ?? "")}"></label>`;
 }
 
 async function onSave(event) {
@@ -389,15 +390,15 @@ async function onSave(event) {
   message.textContent = "Guardando...";
   const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
   try {
-    const endpoint = currentRecord?.id ? `/api/${currentResource}/${currentRecord.id}` : `/api/${currentResource}`;
+    const endpoint = currentRecord?.id && !currentRecord?._seed ? `/api/${currentResource}/${currentRecord.id}` : `/api/${currentResource}`;
     const data = await api(endpoint, {
-      method: currentRecord?.id ? "PATCH" : "POST",
+      method: currentRecord?.id && !currentRecord?._seed ? "PATCH" : "POST",
       body: payload,
     });
     message.textContent = "Guardado correctamente.";
     await loadRows({ openKey: recordKey(data.row || currentRecord) });
   } catch (error) {
-    message.textContent = error.message;
+    message.textContent = humanMessage(error);
   }
 }
 
@@ -431,6 +432,7 @@ function updateListSummary() {
 }
 
 function recordKey(row) {
+  if (row?._seed) return `seed:${row._seedKey || row.slug || row.key || row.id}`;
   return row?.id ?? row?.key ?? "";
 }
 
@@ -442,6 +444,16 @@ function defaultRecord() {
     return { status: "draft" };
   }
   return {};
+}
+
+function mergeSeedRows(resource, apiRows) {
+  const seeds = (window.MUNI_SEED_DATA && window.MUNI_SEED_DATA[resource]) || [];
+  if (!seeds.length) return apiRows;
+  const seen = new Set(apiRows.map((row) => row.slug || row.key || row.email || String(row.id)));
+  const missingSeeds = seeds
+    .filter((row) => !seen.has(row.slug || row.key || row.email || String(row.id)))
+    .map((row) => ({ ...row, _seed: true, _seedKey: row.slug || row.key || row.email || String(row.id) }));
+  return [...apiRows, ...missingSeeds];
 }
 
 function resourceQuery() {
@@ -556,7 +568,7 @@ async function uploadFile() {
     navigator.clipboard?.writeText(data.file_path);
     message.textContent = `Ruta lista: ${data.file_path}`;
   } catch (error) {
-    message.textContent = error.message;
+    message.textContent = humanMessage(error);
   }
 }
 
@@ -606,6 +618,27 @@ async function api(path, options = {}) {
   }
   if (!response.ok) throw new Error(data.error || data.detail || data.message || `Error HTTP ${response.status}`);
   return data;
+}
+
+function humanMessage(error) {
+  const text = String(error?.message || error || "");
+  const lower = text.toLowerCase();
+  if (lower.includes("invalid login") || lower.includes("incorrect") || lower.includes("credencial") || lower.includes("contraseña")) {
+    return "Correo o contraseña incorrectos.";
+  }
+  if (lower.includes("failed to fetch") || lower.includes("network") || lower.includes("conexión")) {
+    return "No se pudo conectar con el servidor. Revisa tu internet e intenta nuevamente.";
+  }
+  if (lower.includes("tardó demasiado") || lower.includes("abort")) {
+    return "La solicitud tardó demasiado. Intenta nuevamente.";
+  }
+  if (lower.includes("sesión") || lower.includes("jwt") || lower.includes("token")) {
+    return "La sesión venció. Vuelve a iniciar sesión.";
+  }
+  if (lower.includes("permission") || lower.includes("permiso") || lower.includes("rls")) {
+    return "Tu usuario no tiene permiso para realizar esta acción.";
+  }
+  return text && text.length < 140 ? text : "No se pudo completar la acción. Intenta nuevamente.";
 }
 
 function setActiveTab() {

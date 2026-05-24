@@ -15,6 +15,9 @@
 
 body {
   margin: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   background: var(--paper);
   color: var(--ink);
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -98,6 +101,13 @@ label {
   font-weight: 800;
 }
 
+label small {
+  color: var(--muted);
+  font-size: .78rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
 input,
 select,
 textarea {
@@ -145,6 +155,11 @@ form {
   padding: 1rem;
 }
 
+.sidebar > .ghost {
+  align-self: flex-start;
+  width: auto;
+}
+
 .brand {
   display: flex;
   align-items: center;
@@ -167,6 +182,7 @@ form {
 .sidebar nav {
   display: grid;
   gap: .35rem;
+  min-width: 0;
 }
 
 .sidebar nav button {
@@ -283,6 +299,7 @@ form {
 .record span {
   color: var(--muted);
   font-size: .86rem;
+  overflow-wrap: anywhere;
 }
 
 .fields {
@@ -346,6 +363,12 @@ form {
     grid-template-columns: 1fr;
   }
 
+  .login-card {
+    width: min(100% - 1rem, 520px);
+    margin: 1rem auto;
+    padding: 1rem;
+  }
+
   .grid {
     display: block;
   }
@@ -361,13 +384,20 @@ form {
     display: flex;
     gap: .45rem;
     overflow-x: auto;
+    max-width: 100%;
     padding-bottom: .2rem;
+    -webkit-overflow-scrolling: touch;
   }
 
   .sidebar nav button {
     flex: 0 0 auto;
     white-space: nowrap;
     padding: .58rem .75rem;
+  }
+
+  .sidebar > .ghost {
+    min-height: 38px;
+    padding: .52rem .7rem;
   }
 
   .workspace-head,
@@ -384,6 +414,15 @@ form {
 
   .workspace {
     padding: .75rem;
+  }
+
+  .actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .actions button {
+    flex: 1;
   }
 
   .workspace h2 {
@@ -411,5 +450,44 @@ form {
 
   textarea {
     min-height: 118px;
+  }
+
+  .record {
+    padding: .68rem;
+  }
+
+  .record strong {
+    font-size: .92rem;
+  }
+
+  .readonly-field {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 430px) {
+  .workspace,
+  .sidebar {
+    padding-left: .55rem;
+    padding-right: .55rem;
+  }
+
+  .list-panel,
+  .form-panel {
+    border-radius: 10px;
+    padding: .72rem;
+  }
+
+  .workspace-head {
+    gap: .5rem;
+  }
+
+  .workspace h2 {
+    font-size: 1.18rem;
+  }
+
+  button,
+  .preview-link {
+    padding: .62rem .72rem;
   }
 }
