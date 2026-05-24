@@ -51,6 +51,12 @@
 
         <div class="grid">
           <section class="list-panel">
+            <div class="panel-head">
+              <div>
+                <strong>Registros cargados</strong>
+                <span data-list-summary>Selecciona uno para editarlo.</span>
+              </div>
+            </div>
             <div class="list-tools">
               <input type="search" placeholder="Filtrar registros" data-filter>
               <button class="ghost" type="button" data-export hidden>Exportar CSV</button>
@@ -92,15 +98,24 @@
             <div class="record-list" data-record-list></div>
           </section>
 
-          <section class="form-panel">
+          <section class="form-panel" data-form-panel hidden>
             <form data-editor-form>
               <div class="form-head">
-                <h3 data-form-title>Editar registro</h3>
-                <span data-record-id></span>
+                <div>
+                  <h3 data-form-title>Editar registro</h3>
+                  <span data-record-id></span>
+                </div>
+                <button class="ghost compact-button" type="button" data-back-to-list>Volver al listado</button>
               </div>
-              <div class="fields" data-fields></div>
+              <div class="editor-help" data-editor-help>
+                Carga o edita la información en campos estandarizados. Para imágenes o documentos, sube el archivo y pega la ruta en el campo correspondiente.
+              </div>
               <div class="upload-box" data-upload-box hidden>
-                <label>Subir archivo
+                <div>
+                  <strong>Subir archivo</strong>
+                  <p>Para la portada usa imágenes horizontales livianas: 1600 × 900 px, JPG o WebP, idealmente menores de 350 KB.</p>
+                </div>
+                <label>Archivo
                   <input type="file" data-upload-file accept=".jpg,.jpeg,.png,.webp,.pdf,.docx">
                 </label>
                 <select data-upload-folder>
@@ -108,9 +123,10 @@
                   <option value="documents">Documento</option>
                   <option value="attachments">Respaldo</option>
                 </select>
-                <button type="button" data-upload-button>Subir y copiar ruta</button>
+                <button type="button" data-upload-button>Subir y usar ruta</button>
                 <p data-upload-message></p>
               </div>
+              <div class="fields" data-fields></div>
               <div class="form-actions" data-form-actions>
                 <button type="submit">Guardar</button>
                 <a class="preview-link" href="/" target="_blank" rel="noreferrer" data-preview>Ver sitio público</a>
@@ -123,7 +139,7 @@
     </section>
   </main>
 
-  <script src="/_panel/config.js?v=audit1"></script>
-  <script src="/_panel/admin.js?v=audit1"></script>
+  <script src="/_panel/config.js?v=editor2"></script>
+  <script src="/_panel/admin.js?v=editor2"></script>
 </body>
 </html>

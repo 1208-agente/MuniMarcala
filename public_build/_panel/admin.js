@@ -129,6 +129,21 @@ const resources = {
       ["internal_notes", "Notas internas", "textarea"],
     ],
   },
+  settings: {
+    label: "Portada y sitio",
+    title: "key",
+    subtitle: "value",
+    upload: true,
+    noNew: true,
+    fields: [
+      ["key", "Campo", "select", [
+        "site_name", "contact_phone", "contact_email", "contact_address",
+        "hero_title", "hero_summary", "hero_image", "hero_image_2", "hero_image_3",
+        "history_title", "history_body",
+      ]],
+      ["value", "Valor", "textarea"],
+    ],
+  },
   audit_logs: {
     label: "Auditoría",
     title: "entity_title",
@@ -171,6 +186,21 @@ const list = $("[data-record-list]");
 const fields = $("[data-fields]");
 const auditFilters = $("[data-audit-filters]");
 const exportButton = $("[data-export]");
+const formPanel = $("[data-form-panel]");
+
+const settingLabels = {
+  site_name: "Nombre del sitio",
+  contact_phone: "Teléfono",
+  contact_email: "Correo",
+  contact_address: "Dirección",
+  hero_title: "Título de portada",
+  hero_summary: "Texto de portada",
+  hero_image: "Imagen principal del hero",
+  hero_image_2: "Imagen alterna del hero 2",
+  hero_image_3: "Imagen alterna del hero 3",
+  history_title: "Título histórico",
+  history_body: "Historia municipal",
+};
 
 init();
 
@@ -179,7 +209,8 @@ function init() {
   $("[data-login-form]").addEventListener("submit", onLogin);
   $("[data-editor-form]").addEventListener("submit", onSave);
   $("[data-refresh]").addEventListener("click", loadRows);
-  $("[data-new]").addEventListener("click", () => editRecord({}));
+  $("[data-new]").addEventListener("click", () => editRecord(defaultRecord()));
+  $("[data-back-to-list]").addEventListener("click", showListMode);
   $("[data-filter]").addEventListener("input", renderList);
   $("[data-export]").addEventListener("click", exportRows);
   $("[data-logout]").addEventListener("click", logout);
@@ -268,7 +299,7 @@ function clearLoginForm(form) {
   if (password) password.value = "";
 }
 
-async function loadRows() {
+async function loadRows(options = {}) {
   setActiveTab();
   const config = resources[currentResource];
   $("[data-section-title]").textContent = config.label;
@@ -279,7 +310,15 @@ async function loadRows() {
     const data = await api(`/api/${currentResource}${resourceQuery()}`);
     rows = data.rows || [];
     renderList();
-    editRecord(rows[0] || {});
+    updateListSummary();
+    const openKey = options.openKey || null;
+    if (openKey) {
+      const selected = rows.find((row) => String(recordKey(row)) === String(openKey));
+      if (selected) editRecord(selected);
+    } else {
+      currentRecord = null;
+      showListMode();
+    }
   } catch (error) {
     list.innerHTML = `<p class="message">${error.message}</p>`;
   }
@@ -289,13 +328,13 @@ function renderList() {
   const config = resources[currentResource];
   const filtered = filteredRows();
   list.innerHTML = filtered.map((row) => `
-    <button class="record ${currentRecord?.id === row.id ? "active" : ""}" type="button" data-id="${row.id}">
+    <button class="record ${String(recordKey(currentRecord || {})) === String(recordKey(row)) ? "active" : ""}" type="button" data-id="${escapeHtml(recordKey(row))}">
       <strong>${escapeHtml(recordTitle(row, config))}</strong>
       <span>${escapeHtml(recordSubtitle(row, config))}</span>
     </button>
   `).join("") || "<p>No hay registros.</p>";
   list.querySelectorAll("[data-id]").forEach((button) => {
-    button.addEventListener("click", () => editRecord(rows.find((row) => String(row.id) === button.dataset.id)));
+    button.addEventListener("click", () => editRecord(rows.find((row) => String(recordKey(row)) === button.dataset.id)));
   });
 }
 
@@ -303,7 +342,8 @@ function editRecord(record) {
   currentRecord = record || {};
   const config = resources[currentResource];
   $("[data-form-title]").textContent = config.readOnly ? "Detalle de auditoría" : (currentRecord?.id ? "Editar registro" : "Nuevo registro");
-  $("[data-record-id]").textContent = currentRecord?.id ? `ID ${currentRecord.id}` : "";
+  if (currentResource === "settings") $("[data-form-title]").textContent = settingLabels[currentRecord.key] || "Editar configuración";
+  $("[data-record-id]").textContent = recordKey(currentRecord) ? `ID ${recordKey(currentRecord)}` : "";
   fields.innerHTML = config.readOnly
     ? config.fields.map(([name, label]) => renderReadOnlyField(name, label, currentRecord?.[name])).join("")
     : config.fields.map(([name, label, type, options]) => renderField(name, label, type, options, currentRecord?.[name])).join("");
@@ -315,6 +355,7 @@ function editRecord(record) {
       if (!slugField.value) slugField.value = slugify(titleField.value);
     });
   }
+  showEditorMode();
   renderList();
 }
 
@@ -354,8 +395,7 @@ async function onSave(event) {
       body: payload,
     });
     message.textContent = "Guardado correctamente.";
-    await loadRows();
-    if (data.row?.id) editRecord(data.row);
+    await loadRows({ openKey: recordKey(data.row || currentRecord) });
   } catch (error) {
     message.textContent = error.message;
   }
@@ -363,12 +403,45 @@ async function onSave(event) {
 
 function syncResourceUi(config) {
   $("[data-upload-box]").hidden = !config.upload || config.readOnly;
-  $("[data-new]").hidden = Boolean(config.readOnly);
+  $("[data-new]").hidden = Boolean(config.readOnly || config.noNew);
   $("[data-form-actions]").hidden = Boolean(config.readOnly);
   exportButton.hidden = !config.readOnly;
   auditFilters.hidden = currentResource !== "audit_logs";
   $("[data-filter]").placeholder = config.readOnly ? "Buscar dentro del resultado" : "Filtrar registros";
   $("[data-editor-message]").textContent = "";
+}
+
+function showListMode() {
+  formPanel.hidden = true;
+  document.body.classList.remove("editing-record");
+}
+
+function showEditorMode() {
+  formPanel.hidden = false;
+  document.body.classList.add("editing-record");
+  if (window.matchMedia("(max-width: 900px)").matches) {
+    formPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
+function updateListSummary() {
+  const total = rows.length;
+  const label = total === 1 ? "1 registro cargado" : `${total} registros cargados`;
+  $("[data-list-summary]").textContent = `${label}. Selecciona uno para editarlo.`;
+}
+
+function recordKey(row) {
+  return row?.id ?? row?.key ?? "";
+}
+
+function defaultRecord() {
+  if (currentResource === "content") {
+    return { kind: "actualidad", status: "draft", published_at: new Date().toISOString().slice(0, 10) };
+  }
+  if (["services", "documents", "municipal_authorities", "mayors", "contacts"].includes(currentResource)) {
+    return { status: "draft" };
+  }
+  return {};
 }
 
 function resourceQuery() {
@@ -393,6 +466,9 @@ function filteredRows() {
 }
 
 function recordTitle(row, config) {
+  if (currentResource === "settings") {
+    return settingLabels[row.key] || row.key || "Configuración";
+  }
   if (currentResource === "audit_logs") {
     return `${actionLabel(row.action)} · ${row.entity_title || row.entity_type || "Registro"}`;
   }
@@ -400,10 +476,18 @@ function recordTitle(row, config) {
 }
 
 function recordSubtitle(row, config) {
+  if (currentResource === "settings") {
+    return settingPreview(row.value);
+  }
   if (currentResource === "audit_logs") {
     return `${formatAuditValue("created_at", row.created_at)} · ${row.user_email || "Usuario no registrado"}`;
   }
   return row[config.subtitle] || row.status || row.created_at || "";
+}
+
+function settingPreview(value) {
+  const text = String(value || "");
+  return text.length > 78 ? `${text.slice(0, 78)}...` : text;
 }
 
 function exportRows() {
@@ -468,11 +552,23 @@ async function uploadFile() {
   form.append("folder", folder);
   try {
     const data = await api("/api/upload", { method: "POST", form });
+    applyUploadedPath(data.file_path);
     navigator.clipboard?.writeText(data.file_path);
-    message.textContent = `Ruta copiada: ${data.file_path}`;
+    message.textContent = `Ruta lista: ${data.file_path}`;
   } catch (error) {
     message.textContent = error.message;
   }
+}
+
+function applyUploadedPath(path) {
+  const activeKey = fields.querySelector("[name='key']")?.value || currentRecord?.key || "";
+  const target =
+    (currentResource === "settings" && activeKey.startsWith("hero_image") && fields.querySelector("[name='value']")) ||
+    fields.querySelector("[name='image_path']") ||
+    fields.querySelector("[name='photo_path']") ||
+    fields.querySelector("[name='file_path']") ||
+    fields.querySelector("[name='document_url']");
+  if (target) target.value = path;
 }
 
 async function api(path, options = {}) {

@@ -5,6 +5,20 @@ const JSON_HEADERS = {
   "cache-control": "no-store",
 };
 
+const DEFAULT_SETTINGS = [
+  ["site_name", "Municipalidad de Marcala"],
+  ["contact_phone", ""],
+  ["contact_email", ""],
+  ["contact_address", "Marcala, La Paz"],
+  ["hero_title", "Marcala avanza con su gente"],
+  ["hero_summary", "Información municipal, trámites, actualidad, transparencia y servicios para la ciudadanía."],
+  ["hero_image", "images/hero-marcala.jpg"],
+  ["hero_image_2", "images/hero-town-hall.webp"],
+  ["hero_image_3", "images/hero-community.webp"],
+  ["history_title", "Historia de Marcala"],
+  ["history_body", ""],
+];
+
 const TABLES = {
   content: {
     order: "updated_at.desc",
@@ -115,7 +129,7 @@ async function handleApi(request, env, url) {
     return uploadFile(request, env, user.profile, user.token);
   }
 
-  const match = url.pathname.match(/^\/api\/([a-z_]+)(?:\/(\d+))?$/);
+  const match = url.pathname.match(/^\/api\/([a-z_]+)(?:\/([^/]+))?$/);
   if (!match) return json({ error: "Ruta no encontrada" }, 404);
 
   const [, table, id] = match;
@@ -220,12 +234,25 @@ async function listRows(env, table, url, token) {
     if (url.searchParams.get("date_from")) params.append("created_at", `gte.${url.searchParams.get("date_from")}T00:00:00Z`);
     if (url.searchParams.get("date_to")) params.append("created_at", `lte.${url.searchParams.get("date_to")}T23:59:59Z`);
   }
-  const rows = await supabaseRest(env, `/rest/v1/${table}?${params.toString()}`, { token });
+  let rows = await supabaseRest(env, `/rest/v1/${table}?${params.toString()}`, { token });
+  if (table === "settings") rows = mergeDefaultSettings(rows);
   return json({ rows });
 }
 
 async function createRow(request, env, table, user, token) {
   const payload = cleanPayload(await request.json(), table);
+  if (table === "settings") {
+    if (!payload.key) return json({ error: "La configuración necesita una clave." }, 400);
+    const rows = await supabaseRest(env, "/rest/v1/settings?on_conflict=key&select=*", {
+      method: "POST",
+      body: payload,
+      prefer: "resolution=merge-duplicates,return=representation",
+      token,
+    });
+    const row = rows[0];
+    await audit(env, user, "update", table, null, row?.key || "Configuración", "", token);
+    return json({ row }, 201);
+  }
   const timestamp = nowIso();
   if (table !== "settings") {
     payload.created_at = payload.created_at || timestamp;
@@ -248,6 +275,18 @@ async function createRow(request, env, table, user, token) {
 
 async function updateRow(request, env, table, id, user, token) {
   const payload = cleanPayload(await request.json(), table);
+  if (table === "settings") {
+    payload.key = decodeURIComponent(id);
+    const rows = await supabaseRest(env, "/rest/v1/settings?on_conflict=key&select=*", {
+      method: "POST",
+      body: payload,
+      prefer: "resolution=merge-duplicates,return=representation",
+      token,
+    });
+    const row = rows[0];
+    await audit(env, user, "update", table, null, row?.key || "Configuración", "", token);
+    return json({ row });
+  }
   if (table !== "settings") {
     payload.updated_at = nowIso();
     if (TABLES[table].writable.includes("title") || TABLES[table].writable.includes("name")) {
@@ -279,6 +318,15 @@ function cleanPayload(payload, table) {
     }
   }
   return output;
+}
+
+function mergeDefaultSettings(rows) {
+  const byKey = new Map((rows || []).map((row) => [row.key, row]));
+  const merged = DEFAULT_SETTINGS.map(([key, value]) => byKey.get(key) || { key, value });
+  for (const row of rows || []) {
+    if (!DEFAULT_SETTINGS.some(([key]) => key === row.key)) merged.push(row);
+  }
+  return merged;
 }
 
 async function uploadFile(request, env, user, token) {

@@ -292,7 +292,7 @@ button {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 360px;
   gap: clamp(1rem, 4vw, 2.5rem);
-  padding: clamp(2.5rem, 6vw, 5rem) clamp(1rem, 5vw, 4.5rem);
+  padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 5vw, 4.5rem);
   background:
     linear-gradient(120deg, rgba(12, 74, 110, .92), rgba(12, 74, 110, .82) 52%, rgba(178, 31, 45, .82)),
     repeating-linear-gradient(135deg, rgba(255,255,255,.07) 0 1px, transparent 1px 18px);
@@ -350,8 +350,8 @@ button {
 .civic-hero h1 {
   max-width: 900px;
   margin: 0;
-  font-size: clamp(2.4rem, 5.8vw, 5.6rem);
-  line-height: 1;
+  font-size: clamp(2rem, 5vw, 4.9rem);
+  line-height: 1.03;
 }
 
 .civic-hero p {
@@ -363,8 +363,8 @@ button {
   display: grid;
   max-width: 760px;
   gap: .55rem;
-  margin-top: 1.6rem;
-  padding: 1rem;
+  margin-top: 1.1rem;
+  padding: .75rem;
   border-radius: 8px;
   background: #fff;
   box-shadow: var(--shadow);
@@ -471,7 +471,7 @@ button {
 }
 
 .section {
-  padding: clamp(2.5rem, 6vw, 5rem) clamp(1rem, 5vw, 4.5rem);
+  padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 5vw, 4.5rem);
 }
 
 .topic-section {
@@ -769,7 +769,7 @@ button {
 }
 
 .page-hero {
-  padding: clamp(3rem, 7vw, 6rem) clamp(1rem, 5vw, 4.5rem);
+  padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 5vw, 4.5rem);
   background:
     linear-gradient(120deg, rgba(12, 74, 110, .98), rgba(30, 41, 59, .94) 58%, rgba(178, 31, 45, .92)),
     repeating-linear-gradient(135deg, rgba(255,255,255,.07) 0 1px, transparent 1px 18px);
@@ -777,7 +777,7 @@ button {
 }
 
 .page-hero.compact {
-  min-height: 280px;
+  min-height: 190px;
 }
 
 .page-hero .eyebrow {
@@ -1629,6 +1629,29 @@ button {
   .hero {
     min-height: auto;
     padding-top: 4rem;
+  }
+
+  .civic-hero {
+    gap: 1rem;
+    padding: 1.75rem .9rem 1.35rem;
+  }
+
+  .civic-hero h1 {
+    font-size: clamp(1.75rem, 9vw, 2.55rem);
+    line-height: 1.05;
+  }
+
+  .civic-hero p,
+  .page-hero p {
+    font-size: .98rem;
+  }
+
+  .page-hero {
+    padding: 1.45rem .9rem;
+  }
+
+  .page-hero.compact {
+    min-height: 150px;
   }
 
   .hero-search,

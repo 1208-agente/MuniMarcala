@@ -35,7 +35,7 @@ button,
   color: #fff;
   cursor: pointer;
   font-weight: 800;
-  padding: .8rem 1rem;
+  padding: .68rem .9rem;
   text-decoration: none;
 }
 
@@ -92,8 +92,9 @@ button:disabled {
 
 label {
   display: grid;
-  gap: .35rem;
+  gap: .3rem;
   color: var(--ink);
+  font-size: .92rem;
   font-weight: 800;
 }
 
@@ -105,17 +106,18 @@ textarea {
   border-radius: 10px;
   background: #fff;
   color: var(--ink);
-  padding: .8rem .9rem;
+  font-size: .95rem;
+  padding: .64rem .75rem;
 }
 
 textarea {
-  min-height: 140px;
+  min-height: 108px;
   resize: vertical;
 }
 
 form {
   display: grid;
-  gap: 1rem;
+  gap: .85rem;
 }
 
 .message {
@@ -179,7 +181,7 @@ form {
 }
 
 .workspace {
-  padding: 1.4rem;
+  padding: 1rem;
 }
 
 .workspace-head,
@@ -205,7 +207,7 @@ form {
 
 .grid {
   display: grid;
-  grid-template-columns: minmax(280px, 390px) minmax(0, 1fr);
+  grid-template-columns: minmax(280px, 420px) minmax(0, 1fr);
   gap: 1rem;
 }
 
@@ -215,6 +217,25 @@ form {
   border-radius: 14px;
   background: #fff;
   padding: 1rem;
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: .8rem;
+}
+
+.panel-head strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.panel-head span,
+.editor-help,
+.upload-box p {
+  color: var(--muted);
+  font-size: .88rem;
 }
 
 .record-list {
@@ -244,7 +265,7 @@ form {
   background: #fff;
   color: var(--ink);
   cursor: pointer;
-  padding: .8rem;
+  padding: .72rem .78rem;
   text-align: left;
 }
 
@@ -255,7 +276,8 @@ form {
 
 .record strong {
   display: block;
-  margin-bottom: .25rem;
+  margin-bottom: .18rem;
+  font-size: .95rem;
 }
 
 .record span {
@@ -266,7 +288,7 @@ form {
 .fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  gap: .8rem;
 }
 
 .field-wide {
@@ -278,7 +300,20 @@ form {
   border: 1px dashed var(--line);
   border-radius: 12px;
   background: #f8fafc;
-  padding: 1rem;
+  padding: .85rem;
+}
+
+.upload-box > div {
+  max-width: 360px;
+}
+
+.upload-box strong,
+.upload-box p {
+  margin: 0;
+}
+
+.compact-button {
+  padding: .55rem .75rem;
 }
 
 .readonly-field {
@@ -307,14 +342,32 @@ form {
 @media (max-width: 900px) {
   .login-card,
   .dashboard,
-  .grid,
   .fields {
     grid-template-columns: 1fr;
+  }
+
+  .grid {
+    display: block;
   }
 
   .sidebar {
     position: static;
     height: auto;
+    gap: .7rem;
+    padding: .75rem;
+  }
+
+  .sidebar nav {
+    display: flex;
+    gap: .45rem;
+    overflow-x: auto;
+    padding-bottom: .2rem;
+  }
+
+  .sidebar nav button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: .58rem .75rem;
   }
 
   .workspace-head,
@@ -327,5 +380,36 @@ form {
 
   .audit-filters {
     grid-template-columns: 1fr;
+  }
+
+  .workspace {
+    padding: .75rem;
+  }
+
+  .workspace h2 {
+    font-size: 1.35rem;
+  }
+
+  .form-panel {
+    margin-top: 1rem;
+  }
+
+  body.editing-record .list-panel {
+    display: none;
+  }
+
+  body:not(.editing-record) .form-panel {
+    display: none;
+  }
+
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+    font-size: 1rem;
+  }
+
+  textarea {
+    min-height: 118px;
   }
 }
