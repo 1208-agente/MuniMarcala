@@ -19,7 +19,10 @@
     <label>Contacto<input name="contact" value="{{ item.contact if item else '' }}"></label>
     <label>PDF o enlace relacionado<input name="document_url" value="{{ item.document_url if item else '' }}"></label>
   </div>
-  <label>Resumen<textarea name="summary" rows="3">{{ item.summary if item else '' }}</textarea></label>
+  <label>Resumen
+    <small>Se muestra en la lista general de trámites. Los requisitos y pasos completos quedan dentro de la ficha.</small>
+    <textarea name="summary" rows="3">{{ item.summary if item else '' }}</textarea>
+  </label>
   <label>Requisitos <small>Un requisito por línea.</small><textarea name="requirements" rows="6">{{ item.requirements if item else '' }}</textarea></label>
   <label>Pasos <small>Un paso por línea.</small><textarea name="steps" rows="6">{{ item.steps if item else '' }}</textarea></label>
   <label>Etiquetas <small>Máximo 4, separadas por coma.</small><input name="tags" value="{{ item.tags if item else '' }}"></label>

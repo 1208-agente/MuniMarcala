@@ -37,8 +37,14 @@
     <label>Texto del botón<input name="cta_label" value="{{ item.cta_label if item else '' }}" placeholder="Más información"></label>
     <label>Enlace del botón<input name="cta_url" value="{{ item.cta_url if item else '' }}"></label>
   </div>
-  <label>Resumen<textarea name="summary" rows="3">{{ item.summary if item else '' }}</textarea></label>
-  <label>Contenido<textarea name="body" rows="10">{{ item.body if item else '' }}</textarea></label>
+  <label>Resumen
+    <small>Se muestra en las vistas generales y tarjetas del sitio. Manténlo corto; el texto completo va abajo.</small>
+    <textarea name="summary" rows="3">{{ item.summary if item else '' }}</textarea>
+  </label>
+  <label>Contenido completo
+    <small>Este texto se muestra al abrir la publicación individual.</small>
+    <textarea name="body" rows="10">{{ item.body if item else '' }}</textarea>
+  </label>
   <div class="form-grid">
     <label>Imagen<input type="file" name="image_file" accept=".jpg,.jpeg,.png,.webp"></label>
     <label>Texto alternativo<input name="image_alt" value="{{ item.image_alt if item else '' }}"></label>

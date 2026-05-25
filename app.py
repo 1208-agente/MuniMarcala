@@ -163,6 +163,14 @@ def create_app() -> Flask:
     def status_label(value: str) -> str:
         return dict(STATUSES).get(value, value)
 
+    @app.template_filter("excerpt")
+    def excerpt(value: Any, limit: int = 180) -> str:
+        text = re.sub(r"\s+", " ", str(value or "")).strip()
+        if len(text) <= limit:
+            return text
+        clipped = text[:limit].rsplit(" ", 1)[0].rstrip(".,;:")
+        return f"{clipped}..."
+
     @app.get("/")
     def home():
         featured = query_all(

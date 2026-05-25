@@ -20,7 +20,7 @@
       <div>
         <span class="pill">{{ item.category|category_label }}</span>
         <h2>{{ item.title }}</h2>
-        <p>{{ item.summary }}</p>
+        <p>{{ (item.summary or item.body)|excerpt(190) }}</p>
         <small>{{ item.published_at|date_label }}</small>
       </div>
     </a>

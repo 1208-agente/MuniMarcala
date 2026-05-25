@@ -18,7 +18,7 @@
     <a class="document-row" href="/transparencia/{{ item.slug }}">
       <span>{{ item.category|category_label }} · {{ item.year or "" }}</span>
       <strong>{{ item.title }}</strong>
-      <p>{{ item.description }}</p>
+      <p>{{ item.description|excerpt(190) }}</p>
       <small>Ver detalle completo</small>
     </a>
     {% endfor %}

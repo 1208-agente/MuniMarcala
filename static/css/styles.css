@@ -599,6 +599,18 @@ button {
   color: var(--muted);
 }
 
+.service-tile p,
+.news-card p,
+.document-row p,
+.person-card p,
+.mayor-panel p,
+.timeline-item p {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
 .split-band {
   background: #fff;
 }

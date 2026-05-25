@@ -41,7 +41,7 @@
       {% if mayor.photo_path %}<img src="{{ asset_url(mayor.photo_path) }}" alt="{{ mayor.name }}">{% endif %}
       <span>{{ "Actual" if mayor.is_current else mayor.period_start }}{% if mayor.period_end %} - {{ mayor.period_end }}{% endif %}</span>
       <h3>{{ mayor.name }}</h3>
-      <p>{{ mayor.biography }}</p>
+      <p>{{ mayor.biography|excerpt(150) }}</p>
     </a>
     {% endfor %}
   </div>

@@ -68,7 +68,7 @@
     <a class="service-tile" href="/tramites/{{ item.slug }}">
       <span>{{ item.department or "Municipalidad" }}</span>
       <strong>{{ item.title }}</strong>
-      <p>{{ item.summary }}</p>
+      <p>{{ (item.summary or item.requirements)|excerpt(170) }}</p>
     </a>
     {% endfor %}
   </div>
@@ -89,7 +89,7 @@
       <div>
         <span class="pill">{{ item.category|category_label }}</span>
         <h3>{{ item.title }}</h3>
-        <p>{{ item.summary }}</p>
+        <p>{{ (item.summary or item.body)|excerpt(180) }}</p>
       </div>
     </a>
     {% endfor %}
@@ -116,7 +116,7 @@
     <a class="panel-link" href="/municipalidad/alcaldes/{{ current_mayor.slug }}">
       {% if current_mayor.photo_path %}<img src="{{ asset_url(current_mayor.photo_path) }}" alt="{{ current_mayor.name }}">{% endif %}
       <h2>{{ current_mayor.name }}</h2>
-      <p>{{ current_mayor.biography }}</p>
+      <p>{{ current_mayor.biography|excerpt(170) }}</p>
     </a>
     {% endif %}
     <a class="button" href="/municipalidad">Historia y autoridades</a>
